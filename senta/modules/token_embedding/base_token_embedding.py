@@ -7,6 +7,7 @@
 class BaseTokenEmbedding(object):
     """BaseTokenEmbedding
     """
+
     def __init__(self, emb_dim, vocab_size):
         self.name = "token_emb"
         self.emb_dim = emb_dim

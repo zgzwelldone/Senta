@@ -4,10 +4,10 @@ import
 """
 
 from __future__ import absolute_import
+from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
-from __future__ import absolute_import
 
 import json
 import logging
@@ -17,6 +17,7 @@ import six
 
 from senta.modules.transformer_encoder import encoder, pre_process_layer
 from senta.modules.transformer_encoder import gelu
+
 
 class ErnieModel(object):
     """
@@ -138,12 +139,12 @@ class ErnieModel(object):
 
         if self._emb_mapping_in:
             emb_out = fluid.layers.fc(input=emb_out,
-                          num_flatten_dims=2,
-                          size=self._hidden_size,
-                          param_attr=fluid.ParamAttr(
-                              name='emb_hidden_mapping',
-                              initializer=self._param_initializer),
-                          bias_attr='emb_hidden_mapping_bias')
+                                      num_flatten_dims=2,
+                                      size=self._hidden_size,
+                                      param_attr=fluid.ParamAttr(
+                                          name='emb_hidden_mapping',
+                                          initializer=self._param_initializer),
+                                      bias_attr='emb_hidden_mapping_bias')
 
         if self._dtype == "float16":
             emb_out = fluid.layers.cast(x=emb_out, dtype=self._dtype)
@@ -157,7 +158,7 @@ class ErnieModel(object):
             x=[self_attn_mask] * self._n_head, axis=1)
         n_head_self_attn_mask.stop_gradient = True
 
-        self._enc_out, self._checkpoints= encoder(
+        self._enc_out, self._checkpoints = encoder(
             enc_input=emb_out,
             attn_bias=n_head_self_attn_mask,
             n_layer=self._n_layer,
@@ -186,7 +187,7 @@ class ErnieModel(object):
         :return:
         """
         return self._enc_out
-    
+
     def get_pooled_output(self):
         """Get the first feature of each sequence for classification"""
         next_sent_feat = fluid.layers.slice(

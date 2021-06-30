@@ -18,6 +18,7 @@ class ErnieClassificationFieldReader(BaseFieldReader):
     """使用ernie的文本类型的field_reader，用户不需要自己分词
         处理规则是：自动添加padding,mask,position,task,sentence,并返回length
         """
+
     def __init__(self, field_config):
         """
         :param field_config:
@@ -115,7 +116,7 @@ class ErnieClassificationFieldReader(BaseFieldReader):
 
                 if len(src_id) > self.field_config.max_seq_len - 2:
                     src_id = truncation_words(src_id, self.field_config.max_seq_len - 2,
-                                                   self.field_config.truncation_type)
+                                              self.field_config.truncation_type)
                     src_id.insert(0, self.tokenizer.covert_token_to_id("[CLS]"))
                     src_id.append(self.tokenizer.covert_token_to_id("[SEP]"))
 

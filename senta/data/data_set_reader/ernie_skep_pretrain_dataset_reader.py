@@ -7,14 +7,14 @@ from __future__ import division
 from __future__ import print_function
 
 import collections
-import six
-import logging
-import gzip
 import copy
-import paddle.fluid as fluid
-import numpy as np
-from six.moves import xrange
+import gzip
+import logging
 
+import numpy as np
+import paddle.fluid as fluid
+import six
+from six.moves import xrange
 
 
 def multi_sent_sorted(token_ids, sent_ids, pos_ids, label, seg_labels, cls_id, sep_id):
@@ -111,7 +111,6 @@ def multi_sent_sorted(token_ids, sent_ids, pos_ids, label, seg_labels, cls_id, s
         logging.error('res %s %s %s' % (label, len(token_ids_list), token_ids_list))
         logging.error("format error")
     """
-
 
     return (shuffle_token_ids, shuffle_sent_ids, pos_ids, shuffle_label, shuffle_seg_labels)
 
@@ -404,16 +403,18 @@ def pad_batch_data(insts,
     return return_list if len(return_list) > 1 else return_list[0]
 
 
-class FluidDataType(object):                                                                                                                                 
-    """ FluidDataType data struct wrapper """                                                                                                                
-    def __init__(self, shape, dtype, lod_level):                                                                                                             
-        self.shape = shape                                                                                                                                   
-        self.dtype = dtype                                                                                                                                   
+class FluidDataType(object):
+    """ FluidDataType data struct wrapper """
+
+    def __init__(self, shape, dtype, lod_level):
+        self.shape = shape
+        self.dtype = dtype
         self.lod_level = lod_level
 
 
 class ErnieSkepPretrainDataReader(object):
     """ErnieSkepPretrainDataReader"""
+
     def __init__(self, args, pyreader_name, tokenizer, task_group, evaluate=False):
 
         self.args = args
@@ -463,9 +464,9 @@ class ErnieSkepPretrainDataReader(object):
         self.data_types["sbo_pos_left"] = FluidDataType([-1, 1], 'int64', 0)
         self.data_types["sbo_pos_right"] = FluidDataType([-1, 1], 'int64', 0)
         self.data_types["mask_pos_ids"] = FluidDataType([-1, 1], 'int64', 0)
-        #self.data_types["senti_pos"] = FluidDataType([-1, 1], 'int64', 0)
-        #self.data_types["senti_pol"] = FluidDataType([-1, 1], 'int64', 0)
-        #self.data_types["pair_label"] = FluidDataType([-1, 1], 'int64', 0)
+        # self.data_types["senti_pos"] = FluidDataType([-1, 1], 'int64', 0)
+        # self.data_types["senti_pol"] = FluidDataType([-1, 1], 'int64', 0)
+        # self.data_types["pair_label"] = FluidDataType([-1, 1], 'int64', 0)
 
         for task in self.task_group:
             self.data_types[task['task_name']] = FluidDataType([-1, 1], 'int64', 0)
@@ -475,7 +476,7 @@ class ErnieSkepPretrainDataReader(object):
         """return current progress of traning data
         """
         progress_out = (self.current_epoch, self.current_file_index, \
-                self.total_file, self.current_file, self.mask_type)
+                        self.total_file, self.current_file, self.mask_type)
         return progress_out
 
     def parse_line(self, line, max_seq_len=512, task_index=None):
@@ -524,17 +525,17 @@ class ErnieSkepPretrainDataReader(object):
         if data_func and data_func != "":
             token_ids, sent_ids, pos_ids, label, seg_labels = \
                 eval(data_func)(token_ids, sent_ids,
-                                                pos_ids, label, seg_labels, self.cls_id, self.sep_id)
+                                pos_ids, label, seg_labels, self.cls_id, self.sep_id)
 
         if isinstance(task_index, int):
             task_ids = [task_index] * len(token_ids)
         else:
             task_ids = [0] * len(token_ids)
 
-        #logging.info("token:%d\tsent:%d\tpos:%d\tseg:%d\ttask:%d" % (len(token_ids), len(sent_ids), len(pos_ids), len(seg_labels), len(task_ids)))
+        # logging.info("token:%d\tsent:%d\tpos:%d\tseg:%d\ttask:%d" % (len(token_ids), len(sent_ids), len(pos_ids), len(seg_labels), len(task_ids)))
         assert len(token_ids) == len(sent_ids) == len(pos_ids) == len(
             seg_labels) == len(task_ids
-        ), "[Must be true]len(token_ids) == len(sent_ids) == len(pos_ids) == len(seg_labels) == len(task_ids)"
+                               ), "[Must be true]len(token_ids) == len(sent_ids) == len(pos_ids) == len(seg_labels) == len(task_ids)"
 
         if len(token_ids) > max_seq_len:
             return None
@@ -682,8 +683,8 @@ class ErnieSkepPretrainDataReader(object):
                 for sample in samples:
                     yield sample
             logging.info("miss_num:%d\tideal_total_sample_num:%d\tmiss_rate:%f" %
-                  (num_total_miss, pos_sample_num * 2,
-                   num_total_miss / (pos_sample_num * 2)))
+                         (num_total_miss, pos_sample_num * 2,
+                          num_total_miss / (pos_sample_num * 2)))
 
     def create_reader(self):
         """ 初始化paddle_py_reader，必须要初始化，否则会抛出异常
@@ -730,6 +731,7 @@ class ErnieSkepPretrainDataReader(object):
 
         def wrapper():
             """wrapper"""
+
             def reader(task_index):
                 """reader"""
                 files = all_files[task_index]

@@ -8,20 +8,19 @@ from __future__ import division
 from __future__ import print_function
 
 import collections
+import logging
+import multiprocessing
+import os
 from collections import OrderedDict
 
-from paddle.fluid.incubate.fleet.collective import fleet
-
-import multiprocessing
 import paddle.fluid as fluid
-import os
-import logging
+from paddle.fluid.incubate.fleet.base import role_maker
+from paddle.fluid.incubate.fleet.collective import fleet
+from paddle.fluid.incubate.fleet.parameter_server.distribute_transpiler import fleet
+
 import senta.utils.init as init
 from senta.common.rule import InstanceName
 from senta.utils.util_helper import save_infer_data_meta
-from paddle.fluid.incubate.fleet.parameter_server.distribute_transpiler import fleet
-from paddle.fluid.incubate.fleet.base import role_maker
-import threading
 
 
 class BaseTrainer(object):
@@ -71,7 +70,7 @@ class BaseTrainer(object):
                 self.dev_count = len(gpus)
             else:
                 self.dev_count = fluid.core.get_cuda_device_count()
-            #logging.debug("gpu count %d" % self.dev_count)
+            # logging.debug("gpu count %d" % self.dev_count)
             self.prepare_nccl2_env(self.is_local)
             logging.debug("finish prepare nccl2 env")
         else:
@@ -481,6 +480,7 @@ def linear_warmup_decay(learning_rate, warmup_steps, num_train_steps):
 
         return lr
 
+
 def append_cast_op(i, o, prog):
     """
     Append a cast op in a given Program to cast input `i` to data type `o.dtype`.
@@ -495,7 +495,6 @@ def append_cast_op(i, o, prog):
         outputs={"Out": o},
         attrs={"in_dtype": i.dtype,
                "out_dtype": o.dtype})
-
 
 
 def copy_to_master_param(p, block):
@@ -619,7 +618,6 @@ def update_loss_scaling(is_overall_finite, prev_loss_scaling, num_good_steps,
                     fluid.layers.increment(num_bad_steps)
 
 
-
 def apply_dynamic_loss_scaling(loss_scaling, master_params_grads,
                                incr_every_n_steps, decr_every_n_nan_or_inf,
                                incr_ratio, decr_ratio):
@@ -660,6 +658,7 @@ def apply_dynamic_loss_scaling(loss_scaling, master_params_grads,
             for _, g in master_params_grads:
                 fluid.layers.assign(fluid.layers.zeros_like(g), g)
 
+
 def master_param_to_train_param(master_params_grads, params_grads, main_prog):
     """ master_param_to_train_param """
     for idx, m_p_g in enumerate(master_params_grads):
@@ -669,6 +668,7 @@ def master_param_to_train_param(master_params_grads, params_grads, main_prog):
                 fluid.layers.assign(m_p_g[0], train_p)
             else:
                 append_cast_op(m_p_g[0], train_p, main_prog)
+
 
 def optimization(loss,
                  warmup_steps,

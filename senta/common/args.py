@@ -7,7 +7,6 @@ from __future__ import print_function
 import logging
 
 import six
-import argparse
 
 
 def str2bool(v):
@@ -17,6 +16,7 @@ def str2bool(v):
 
 class ArgumentGroup(object):
     """ define args """
+
     def __init__(self, parser, title, des):
         self._group = parser.add_argument_group(title=title, description=des)
 

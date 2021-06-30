@@ -1,23 +1,25 @@
 # -*- coding: utf-8 -*
 """import"""
 import json
+import os
+import sys
 import unicodedata
 from collections import OrderedDict
+
+import paddle.fluid as fluid
 import six
 from paddle.fluid.core_avx import PaddleTensor
+
 from senta.common.rule import MaxTruncation
-import sys
-import os
-import paddle
-import paddle.fluid as fluid
 
 try:
     import pkg_resources
+
     get_module_res = lambda *res: pkg_resources.resource_stream(__name__,
                                                                 os.path.join(*res))
 except ImportError:
     get_module_res = lambda *res: open(os.path.normpath(os.path.join(
-                            os.getcwd(), os.path.dirname(__file__), *res)), 'rb')
+        os.getcwd(), os.path.dirname(__file__), *res)), 'rb')
 
 PY2 = sys.version_info[0] == 2
 
@@ -40,6 +42,7 @@ else:
     itervalues = lambda d: iter(d.values())
     iteritems = lambda d: iter(d.items())
 
+
 def strdecode(sentence):
     """
     string to unicode
@@ -59,14 +62,15 @@ def check_cuda(use_cuda):
     check_cuda
     """
     err = \
-    "\nYou can not set use_cuda = True in the model because you are using paddlepaddle-cpu.\n \
-    Please: 1. Install paddlepaddle-gpu to run your models on GPU or 2. Set use_cuda = False to run models on CPU.\n"
+        "\nYou can not set use_cuda = True in the model because you are using paddlepaddle-cpu.\n \
+        Please: 1. Install paddlepaddle-gpu to run your models on GPU or 2. Set use_cuda = False to run models on CPU.\n"
     try:
         if use_cuda == True and fluid.is_compiled_with_cuda() == False:
             print(err)
             sys.exit(1)
     except Exception as e:
         pass
+
 
 def parse_data_config(config_path):
     """
@@ -201,7 +205,7 @@ def is_punctuation(char):
     # Punctuation class but we treat them as punctuation anyways, for
     # consistency.
     if ((cp >= 33 and cp <= 47) or (cp >= 58 and cp <= 64) or
-        (cp >= 91 and cp <= 96) or (cp >= 123 and cp <= 126)):
+            (cp >= 91 and cp <= 96) or (cp >= 123 and cp <= 126)):
         return True
     cat = unicodedata.category(char)
     if cat.startswith("P"):
@@ -248,4 +252,3 @@ def save_infer_data_meta(data_dict, save_file):
     json_str = json.dumps(data_dict)
     with open(save_file, 'w') as json_file:
         json_file.write(json_str)
-

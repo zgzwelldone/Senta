@@ -17,13 +17,11 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import time
 import numpy as np
-
+import paddle.fluid as fluid
 from scipy.stats import pearsonr, spearmanr
 from six.moves import xrange
-import paddle.fluid as fluid
-from functools import partial
+
 
 def scale_l2(x, norm_length):
     """
@@ -36,7 +34,7 @@ def scale_l2(x, norm_length):
 
     alpha = fluid.layers.reduce_max(fluid.layers.abs(x), dim=1, keep_dim=True) + 1e-12
     l2_norm = alpha * fluid.layers.sqrt(
-            fluid.layers.reduce_sum(fluid.layers.pow(x / alpha), dim=1, keep_dim=True) + 1e-6)
+        fluid.layers.reduce_sum(fluid.layers.pow(x / alpha), dim=1, keep_dim=True) + 1e-6)
     x_unit = x / l2_norm
     return norm_length * x_unit
 
@@ -47,7 +45,7 @@ def pgd_loss(ernie, labels, loss, task_fc_fn, epsilon=0.25):
     but we didn't use the vat loss for now
     """
 
-    #TODO any difference with fleet_main_program or ParallelProgram or TrainProgram?
+    # TODO any difference with fleet_main_program or ParallelProgram or TrainProgram?
     program = fluid.default_main_program()
 
     param_grads = fluid.backward.append_backward(loss, parameter_list=[ernie._word_emb_name])
@@ -58,7 +56,7 @@ def pgd_loss(ernie, labels, loss, task_fc_fn, epsilon=0.25):
     d = filter(lambda p: p[0].name == ernie._word_emb_name, param_grads)[0][1]
     emb = program.block(0).var(ernie._word_emb_name)
 
-    #for _ in range(args.K_iteration):
+    # for _ in range(args.K_iteration):
     K_iteration = 8
     small_constant_for_finite_diff = 1e-5
     emb_hat = emb
@@ -67,10 +65,10 @@ def pgd_loss(ernie, labels, loss, task_fc_fn, epsilon=0.25):
 
     # it seems it can be implemented by the while loop
     for _ in range(K_iteration):
-        #d = xi * utils_tf.l2_batch_normalize(d)
+        # d = xi * utils_tf.l2_batch_normalize(d)
         d = scale_l2(d, small_constant_for_finite_diff)
-        #logits_d = model.get_logits(x + d)
-        #kl = utils_tf.kl_with_logits(logits, logits_d)
+        # logits_d = model.get_logits(x + d)
+        # kl = utils_tf.kl_with_logits(logits, logits_d)
 
         emb_hat = emb_hat + d
         ernie._build_model(emb=emb_hat)
@@ -79,8 +77,8 @@ def pgd_loss(ernie, labels, loss, task_fc_fn, epsilon=0.25):
         gradient = filter(lambda p: p[0].name == ernie._word_emb_name, param_grads)[0][1]
         gradient.stop_gradient = True
         d = gradient
-        #Hd = tf.gradients(kl, d)[0]
-        #d = tf.stop_gradient(Hd)
+        # Hd = tf.gradients(kl, d)[0]
+        # d = tf.stop_gradient(Hd)
 
     d = scale_l2(d, small_constant_for_finite_diff)
     emb_hat = emb_hat + d
@@ -88,6 +86,7 @@ def pgd_loss(ernie, labels, loss, task_fc_fn, epsilon=0.25):
     graph_vars = task_fc_fn(ernie, labels)
 
     return graph_vars['loss']
+
 
 def matthews_corrcoef(preds, labels):
     """matthews_corrcoef"""
@@ -98,7 +97,7 @@ def matthews_corrcoef(preds, labels):
     fp = np.sum((labels == 0) & (preds == 1))
     fn = np.sum((labels == 1) & (preds == 0))
 
-    mcc = ( (tp * tn) - (fp * fn)) / np.sqrt((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn) )
+    mcc = ((tp * tn) - (fp * fn)) / np.sqrt((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn))
     return mcc
 
 
@@ -151,6 +150,7 @@ def simple_accuracy(preds, labels):
     labels = np.array(labels)
     return (preds == labels).mean()
 
+
 def evaluate_mrr(preds):
     """evaluate_mrr"""
     last_qid = None
@@ -175,6 +175,7 @@ def evaluate_mrr(preds):
 
 def evaluate_map(preds):
     """evaluate_map"""
+
     def singe_map(st, en):
         """singe_map"""
         total_p = 0.0

@@ -15,6 +15,7 @@ class TextFieldReader(BaseFieldReader):
     """最基本的文本(text)类型的field_reader
     不需要embedding，不需要mask，只返回原始src_id(添加了padding)和length
     """
+
     def __init__(self, field_config):
         """
         :param field_config:
@@ -73,9 +74,9 @@ class TextFieldReader(BaseFieldReader):
 
         return_list = []
         padded_ids, batch_seq_lens = pad_batch_data(src_ids,
-                                                              pad_idx=self.field_config.padding_id,
-                                                              return_input_mask=False,
-                                                              return_seq_lens=True)
+                                                    pad_idx=self.field_config.padding_id,
+                                                    return_input_mask=False,
+                                                    return_seq_lens=True)
         return_list.append(padded_ids)
         return_list.append(batch_seq_lens)
 
@@ -102,5 +103,3 @@ class TextFieldReader(BaseFieldReader):
         :return:
         """
         return FieldLength.BASIC_TEXT_FIELD
-
-

@@ -9,6 +9,7 @@ from senta.common.register import RegisterSet
 class BaseFieldReader(object):
     """BaseFieldReader: 作用于field的reader，主要是定义py_reader的格式，完成id序列化和embedding的操作
     """
+
     def __init__(self, field_config):
         self.field_config = field_config
         self.tokenizer = None  # 用来分词，需要各个子类实现

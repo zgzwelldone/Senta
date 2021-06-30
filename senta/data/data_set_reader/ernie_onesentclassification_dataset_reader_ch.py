@@ -3,22 +3,23 @@
 :py:class:`BasicDataSetReader`
 """
 import csv
+import logging
 import os
 import traceback
-import logging
 from collections import namedtuple
+
 import numpy as np
-from paddle import fluid
 
 from senta.common.register import RegisterSet
 from senta.data.data_set_reader.base_dataset_reader import BaseDataSetReader
 from senta.data.data_set_reader.basic_dataset_reader import BasicDataSetReader
-from senta.utils.util_helper import convert_to_unicode
+
 
 @RegisterSet.data_set_reader.register
 class OneSentClassifyReaderCh(BasicDataSetReader):
     """BasicDataSetReader:一个基础的data_set_reader，实现了文件读取，id序列化，token embedding化等基本操作
     """
+
     def __init__(self, name, fields, config):
         BaseDataSetReader.__init__(self, name, fields, config)
 
@@ -28,7 +29,7 @@ class OneSentClassifyReaderCh(BasicDataSetReader):
             self.trainer_id = int(os.getenv("PADDLE_TRAINER_ID"))
         if os.getenv("PADDLE_NODES_NUM"):
             self.trainer_nums = int(os.getenv("PADDLE_TRAINERS_NUM"))
-        
+
         if "train" in self.name or "predict" in self.name:
             self.dev_count = self.trainer_nums
         elif "dev" in self.name or "test" in self.name:
@@ -59,7 +60,7 @@ class OneSentClassifyReaderCh(BasicDataSetReader):
                 for line in reader:
                     for index, text in enumerate(line):
                         if index in text_indices:
-                            line[index] = text #.replace(' ', '')
+                            line[index] = text  # .replace(' ', '')
                         elif index in label_indices:
 
                             text_ind = text_indices[0]
@@ -92,7 +93,7 @@ class OneSentClassifyReaderCh(BasicDataSetReader):
             for epoch_index in range(self.config.epoch):
                 self.current_example = 0
                 self.current_epoch = epoch_index
-                self.global_rng = np.random.RandomState(epoch_index) 
+                self.global_rng = np.random.RandomState(epoch_index)
 
                 for input_file in data_files:
                     examples = self.read_files(os.path.join(self.config.data_path, input_file))
@@ -103,7 +104,7 @@ class OneSentClassifyReaderCh(BasicDataSetReader):
                         if len(all_dev_batches) < self.dev_count:
                             all_dev_batches.append(batch_data)
                         if len(all_dev_batches) == self.dev_count:
-                            #trick: handle batch inconsistency caused by data sharding for each trainer
+                            # trick: handle batch inconsistency caused by data sharding for each trainer
                             yield all_dev_batches[self.trainer_id]
                             all_dev_batches = []
                     if "train" not in self.name:
@@ -127,6 +128,3 @@ class OneSentClassifyReaderCh(BasicDataSetReader):
             return_list.extend(id_list)
 
         return return_list
-
-
-     

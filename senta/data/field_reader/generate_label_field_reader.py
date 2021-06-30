@@ -4,6 +4,7 @@
 
 """
 import numpy as np
+
 from senta.common.register import RegisterSet
 from senta.common.rule import DataShape, FieldLength, InstanceName
 from senta.data.field_reader.base_field_reader import BaseFieldReader
@@ -15,6 +16,7 @@ from senta.modules.token_embedding.custom_fluid_embedding import CustomFluidToke
 class GenerateLabelFieldReader(BaseFieldReader):
     """seq2seq label的专用field_reader
     """
+
     def __init__(self, field_config):
         """
         :param field_config:
@@ -34,7 +36,7 @@ class GenerateLabelFieldReader(BaseFieldReader):
 
         if self.field_config.embedding_info and self.field_config.embedding_info["use_reader_emb"]:
             self.token_embedding = CustomFluidTokenEmbedding(emb_dim=self.field_config.embedding_info["emb_dim"],
-                                                       vocab_size=self.tokenizer.vocabulary.get_vocab_size())
+                                                             vocab_size=self.tokenizer.vocabulary.get_vocab_size())
 
     def init_reader(self):
         """ 初始化reader格式
@@ -100,16 +102,16 @@ class GenerateLabelFieldReader(BaseFieldReader):
         return_list = []
 
         train_label_ids, train_label_mask, label_lens = generate_pad_batch_data(train_src_ids,
-                                                                       pad_idx=self.field_config.padding_id,
-                                                                       return_input_mask=True,
-                                                                       return_seq_lens=True,
-                                                                       paddle_version_code=self.paddle_version_code)
+                                                                                pad_idx=self.field_config.padding_id,
+                                                                                return_input_mask=True,
+                                                                                return_seq_lens=True,
+                                                                                paddle_version_code=self.paddle_version_code)
 
         infer_label_ids, infer_label_mask, label_lens = generate_pad_batch_data(infer_src_ids,
-                                                                       pad_idx=self.field_config.padding_id,
-                                                                       return_input_mask=True,
-                                                                       return_seq_lens=True,
-                                                                       paddle_version_code=self.paddle_version_code)
+                                                                                pad_idx=self.field_config.padding_id,
+                                                                                return_input_mask=True,
+                                                                                return_seq_lens=True,
+                                                                                paddle_version_code=self.paddle_version_code)
 
         infer_label_ids = np.reshape(infer_label_ids, (infer_label_ids.shape[0], infer_label_ids.shape[1], 1))
 
@@ -153,5 +155,3 @@ class GenerateLabelFieldReader(BaseFieldReader):
         :return:
         """
         return FieldLength.GENERATE_LABEL_FIELD
-
-

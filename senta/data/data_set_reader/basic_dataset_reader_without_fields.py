@@ -13,31 +13,31 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 import json
 import logging
-import numpy as np
-import traceback
-import importlib
-import traceback
+import os
 from collections import namedtuple
 
-from senta.common.rule import InstanceName, MaxTruncation
-from senta.common.register import RegisterSet
+import numpy as np
 
+from senta.common.register import RegisterSet
+from senta.common.rule import InstanceName
 from senta.data.data_set_reader.base_dataset_reader import BaseDataSetReader
 from senta.data.data_set_reader.basic_dataset_reader import BasicDataSetReader
 from senta.data.tokenizer.tokenization_spm import preprocess_text
 from senta.data.tokenizer.tokenization_utils import convert_to_unicode
+
+
 # from senta.data.tokenizer.tokenization_ernie_en import preprocess_text
 
 
 @RegisterSet.data_set_reader.register
 class TaskBaseReader(BasicDataSetReader):
     """task base reader class"""
+
     def __init__(self,
-                 name, 
-                 fields, 
+                 name,
+                 fields,
                  config,
                  vocab_path,
                  label_map_config=None,
@@ -63,7 +63,7 @@ class TaskBaseReader(BasicDataSetReader):
         self.cls_id = self.vocab["[CLS]"]
         self.sep_id = self.vocab["[SEP]"]
         self.in_tokens = in_tokens
-        
+
         if "train" in self.name:
             self.phase = InstanceName.TRAINING
         elif "dev" in self.name:
@@ -73,14 +73,13 @@ class TaskBaseReader(BasicDataSetReader):
         else:
             self.phase = None
 
-
         self.trainer_id = 0
         self.trainer_nums = 1
         if os.getenv("PADDLE_TRAINER_ID"):
             self.trainer_id = int(os.getenv("PADDLE_TRAINER_ID"))
         if os.getenv("PADDLE_NODES_NUM"):
             self.trainer_nums = int(os.getenv("PADDLE_TRAINERS_NUM"))
-        
+
         if "train" in self.name or "predict" in self.name:
             self.dev_count = self.trainer_nums
         elif "dev" in self.name or "test" in self.name:
@@ -100,7 +99,7 @@ class TaskBaseReader(BasicDataSetReader):
                 self.label_map = json.load(f)
         else:
             self.label_map = None
-    
+
     # def get_train_progress(self):
     #     """Gets progress for training phase."""
     #     return self.current_example, self.current_epoch
@@ -197,7 +196,7 @@ class TaskBaseReader(BasicDataSetReader):
         Record = namedtuple(
             'Record',
             ['token_ids', 'text_type_ids', 'position_ids', 'label_id', 'task_ids', 'qid'
-        ])
+             ])
 
         qid = None
         if "qid" in example._fields:
@@ -212,14 +211,13 @@ class TaskBaseReader(BasicDataSetReader):
             qid=qid)
         return record
 
-
     def convert_example_to_record(self, example, max_seq_length, tokenizer, is_zh=True):
         """Converts a single `Example` into a single `Record`."""
-        
+
         if is_zh:
             text_a = convert_to_unicode(example.text_a)
         else:
-            text_a = convert_to_unicode(preprocess_text(example.text_a, 
+            text_a = convert_to_unicode(preprocess_text(example.text_a,
                                                         lower=self.do_lower_case))
         tokens_a = tokenizer.tokenize(text_a)
         tokens_b = None
@@ -227,7 +225,7 @@ class TaskBaseReader(BasicDataSetReader):
             if is_zh:
                 text_b = convert_to_unicode(example.text_b)
             else:
-                text_b = convert_to_unicode(preprocess_text(example.text_b, 
+                text_b = convert_to_unicode(preprocess_text(example.text_b,
                                                             lower=self.do_lower_case))
             tokens_b = tokenizer.tokenize(text_b)
 
@@ -296,11 +294,11 @@ class TaskBaseReader(BasicDataSetReader):
                 self.current_example += 1
 
             if self.text_field_more_than_3:
-                record = self.convert_example_to_record_3(example, self.max_seq_len, 
-                                                         self.tokenizer)
+                record = self.convert_example_to_record_3(example, self.max_seq_len,
+                                                          self.tokenizer)
             else:
                 record = self.convert_example_to_record(example, self.max_seq_len,
-                                                         self.tokenizer)
+                                                        self.tokenizer)
             max_len = max(max_len, len(record.token_ids))
             if self.in_tokens:
                 to_append = (len(batch_records) + 1) * max_len <= batch_size
@@ -314,7 +312,7 @@ class TaskBaseReader(BasicDataSetReader):
 
         if batch_records:
             yield self.serialize_batch_records(batch_records)
-    
+
     def data_generator(self):
         """generate data"""
         assert os.path.isdir(self.config.data_path), "%s must be a directory that stores data files" \
@@ -323,11 +321,10 @@ class TaskBaseReader(BasicDataSetReader):
 
         assert len(data_files) > 0, "%s is an empty directory" % self.config.data_path
 
-        
         epoch = self.config.epoch
-        batch_size= self.config.batch_size
+        batch_size = self.config.batch_size
         shuffle = self.config.shuffle
-        
+
         def wrapper():
             """wraper"""
             all_dev_batches = []
@@ -361,10 +358,8 @@ class TaskBaseReader(BasicDataSetReader):
                         if trainer_id < len(all_dev_batches):
                             yield all_dev_batches[trainer_id]
 
-
         return wrapper
-    
+
     def serialize_batch_records(self, batch_records):
         """serialize_batch_records"""
         raise NotImplementedError
-

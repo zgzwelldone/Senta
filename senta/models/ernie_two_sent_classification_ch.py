@@ -4,16 +4,15 @@ ErnieClassificationPersonal
 """
 import logging
 import os
-from collections import OrderedDict
 
 import numpy as np
 from paddle import fluid
 
 from senta.common.register import RegisterSet
 from senta.common.rule import InstanceName
+from senta.metrics.glue_eval import evaluate_mrr, evaluate_map
 from senta.models.ernie_classification import ErnieClassification
 from senta.modules.ernie import ErnieConfig, ErnieModel
-from senta.metrics.glue_eval import evaluate_mrr, evaluate_map
 from senta.utils.multi_process_eval import MultiProcessEval
 
 
@@ -23,7 +22,7 @@ class ErnieTwoSentClassificationCh(ErnieClassification):
 
     def __init__(self, model_params):
         ErnieClassification.__init__(self, model_params)
-        #logging.info("ErnieClassificationPersonal init....")
+        # logging.info("ErnieClassificationPersonal init....")
 
     def forward(self, fields_dict, phase):
         """
@@ -173,7 +172,7 @@ class ErnieTwoSentClassificationCh(ErnieClassification):
 
             output_path = "./output/tmpout"
             mul_pro_test = MultiProcessEval(output_path, phase, trainers_num,
-                                                        meta_info[InstanceName.GPU_ID])
+                                            meta_info[InstanceName.GPU_ID])
             if len(qids) == 0:
                 log_info = "[%d_%s evaluation] ave loss: %f, ave acc: %f, data_num: %d, elapsed time: %f s"
                 if mul_pro_test.dev_count == 1:

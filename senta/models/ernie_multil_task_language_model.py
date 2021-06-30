@@ -3,15 +3,17 @@
 Erniexx Language Model
 """
 import collections
-from senta.common.rule import InstanceName
-from senta.modules.ernie import ErnieModel
+
 from senta.common.register import RegisterSet
+from senta.common.rule import InstanceName
 from senta.models.model import Model
+from senta.modules.ernie import ErnieModel
 
 
 @RegisterSet.models.register
 class ErnieMTLM(Model):
     """ErnieMTLM"""
+
     def __init__(self, model_params, args, task_group):
         # tricky code because base class Model need dict as first parameter
         model_params.print_config()
@@ -49,7 +51,7 @@ class ErnieMTLM(Model):
 
         mask_lm_loss = pretrain_ernie.get_lm_output(mask_label, mask_pos)
         total_loss = mask_lm_loss * lm_weight
-        
+
         result['mask_lm_loss'] = mask_lm_loss
         result['lm_weight'] = lm_weight
 
@@ -91,5 +93,3 @@ class ErnieMTLM(Model):
         optimizer_output_dict["opt_args"] = opt_args_dict
 
         return optimizer_output_dict
-
-

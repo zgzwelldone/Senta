@@ -7,12 +7,11 @@ from __future__ import division
 from __future__ import print_function
 
 import collections
-import six
-import logging
 import gzip
-import copy
-import paddle.fluid as fluid
+import logging
+
 import numpy as np
+import paddle.fluid as fluid
 from six.moves import xrange
 
 
@@ -240,16 +239,18 @@ def pad_batch_data(insts,
     return return_list if len(return_list) > 1 else return_list[0]
 
 
-class FluidDataType(object):                                                                                                                                 
-    """ FluidDataType data struct wrapper """                                                                                                                
-    def __init__(self, shape, dtype, lod_level):                                                                                                             
-        self.shape = shape                                                                                                                                   
-        self.dtype = dtype                                                                                                                                   
+class FluidDataType(object):
+    """ FluidDataType data struct wrapper """
+
+    def __init__(self, shape, dtype, lod_level):
+        self.shape = shape
+        self.dtype = dtype
         self.lod_level = lod_level
 
 
 class RobertaPretrainDataReaderEnglish(object):
     """RobertaPretrainDataReaderEnglish"""
+
     def __init__(self, args, pyreader_name, tokenizer, task_group, evaluate=False):
 
         self.args = args
@@ -294,7 +295,7 @@ class RobertaPretrainDataReaderEnglish(object):
         """return current progress of traning data
         """
         progress_out = (self.current_epoch, self.current_file_index, \
-                self.total_file, self.current_file, self.mask_type)
+                        self.total_file, self.current_file, self.mask_type)
         return progress_out
 
     def parse_line(self, line, max_seq_len=512, task_index=None):
@@ -319,7 +320,7 @@ class RobertaPretrainDataReaderEnglish(object):
 
         assert len(token_ids) == len(sent_ids) == len(pos_ids) == len(
             seg_labels) == len(task_ids
-        ), "[Must be true]len(token_ids) == len(sent_ids) == len(pos_ids) == len(seg_labels) == len(task_ids)"
+                               ), "[Must be true]len(token_ids) == len(sent_ids) == len(pos_ids) == len(seg_labels) == len(task_ids)"
 
         if len(token_ids) > max_seq_len:
             return None
@@ -383,6 +384,7 @@ class RobertaPretrainDataReaderEnglish(object):
 
         def wrapper():
             """wrapper"""
+
             def reader(task_index):
                 """reader"""
                 files = all_files[task_index]

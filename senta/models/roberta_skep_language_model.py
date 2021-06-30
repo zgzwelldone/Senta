@@ -3,15 +3,17 @@
 Erniexx Language Model
 """
 import collections
-from senta.common.rule import InstanceName
-from senta.modules.ernie import ErnieModel
+
 from senta.common.register import RegisterSet
+from senta.common.rule import InstanceName
 from senta.models.model import Model
+from senta.modules.ernie import ErnieModel
 
 
 @RegisterSet.models.register
 class RobertaSkepLM(Model):
     """RobertaSkepLM"""
+
     def __init__(self, model_params, args, task_group):
         # tricky code because base class Model need dict as first parameter
         model_params.print_config()
@@ -34,9 +36,9 @@ class RobertaSkepLM(Model):
         mask_label = fields_dict['mask_label']
         mask_pos = fields_dict['mask_pos']
         lm_weight = fields_dict['lm_weight']
-        #senti_pos = fields_dict['senti_pos']
-        #senti_pol = fields_dict['senti_pol']
-        #pair_label = fields_dict['pair_label']
+        # senti_pos = fields_dict['senti_pos']
+        # senti_pol = fields_dict['senti_pol']
+        # pair_label = fields_dict['pair_label']
 
         pretrain_ernie = ErnieModel(
             src_ids=src_ids,
@@ -53,17 +55,16 @@ class RobertaSkepLM(Model):
         mask_lm_loss = pretrain_ernie.get_lm_output(mask_label, mask_pos)
         total_loss = mask_lm_loss * lm_weight
 
-        #senti_pol_loss = pretrain_ernie.get_senti_output(senti_pol, senti_pos)
-        #pair_loss = pretrain_ernie.get_pair_output(pair_label)
-        #total_loss += senti_pol_loss
-        #total_loss += pair_loss
+        # senti_pol_loss = pretrain_ernie.get_senti_output(senti_pol, senti_pos)
+        # pair_loss = pretrain_ernie.get_pair_output(pair_label)
+        # total_loss += senti_pol_loss
+        # total_loss += pair_loss
 
-        
         result['mask_lm_loss'] = mask_lm_loss
         result['lm_weight'] = lm_weight
 
-        #result['senti_pol_loss'] = senti_pol_loss
-        #result['pair_loss'] = pair_loss
+        # result['senti_pol_loss'] = senti_pol_loss
+        # result['pair_loss'] = pair_loss
 
         result[InstanceName.LOSS] = total_loss
         return result
@@ -93,5 +94,3 @@ class RobertaSkepLM(Model):
         optimizer_output_dict["opt_args"] = opt_args_dict
 
         return optimizer_output_dict
-
-

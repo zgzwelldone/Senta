@@ -17,12 +17,12 @@
 metrics
 """
 
-import numpy as np
 import logging
 
-from sklearn import metrics
+import numpy as np
 from paddle import fluid
 from six.moves import xrange
+from sklearn import metrics
 
 log = logging.getLogger(__name__)
 
@@ -33,6 +33,7 @@ __all__ = [
 
 class Metrics(object):
     """Metrics"""
+
     def eval(self, run_value):
         """need overwrite， run_value是动态fetch回来的值，按需要进行计算和打印"""
         raise NotImplementedError
@@ -40,6 +41,7 @@ class Metrics(object):
 
 class Chunk(Metrics):
     """Chunk"""
+
     def eval(self, run_value):
         chunk_metrics = fluid.metrics.ChunkEvaluator()
         num_infer_chunks, num_label_chunks, num_correct_chunks = run_value
@@ -58,6 +60,7 @@ class Chunk(Metrics):
 
 class Acc(Metrics):
     """Acc"""
+
     def eval(self, run_value):
         predict, label = run_value
         if isinstance(predict, list):
@@ -88,6 +91,7 @@ class Acc(Metrics):
 
 class Precision(Metrics):
     """Precision"""
+
     def eval(self, run_value):
         predict, label = run_value
         if isinstance(predict, list):
@@ -118,6 +122,7 @@ class Precision(Metrics):
 
 class Recall(Metrics):
     """Recall"""
+
     def eval(self, run_value):
         predict, label = run_value
         predict_arr = None
@@ -183,6 +188,7 @@ class F1(Metrics):
 
 class Auc(Metrics):
     "Auc"
+
     def eval(self, run_value):
         predict, label = run_value
         predict_arr = None
@@ -220,6 +226,7 @@ class Auc(Metrics):
 
 class Pn(Metrics):
     """Pn"""
+
     def eval(self, run_value):
         pos_score, neg_score = run_value
         wrong_cnt = np.sum(pos_score <= neg_score)
@@ -257,6 +264,7 @@ class Ppl(Metrics):
 
 def chunk_eval(np_labels, np_infers, np_lens, tag_num, dev_count=1):
     """ chunk_eval """
+
     def extract_bio_chunk(seq):
         """ extract_bio_chunk """
         chunks = []
@@ -320,18 +328,18 @@ def chunk_eval(np_labels, np_infers, np_lens, tag_num, dev_count=1):
             infer_index = 0
             label_index = 0
             while label_index < len(label_chunks) \
-                   and infer_index < len(infer_chunks):
+                    and infer_index < len(infer_chunks):
                 if infer_chunks[infer_index]["st"] \
-                    < label_chunks[label_index]["st"]:
+                        < label_chunks[label_index]["st"]:
                     infer_index += 1
                 elif infer_chunks[infer_index]["st"] \
-                    > label_chunks[label_index]["st"]:
+                        > label_chunks[label_index]["st"]:
                     label_index += 1
                 else:
                     if infer_chunks[infer_index]["en"] \
-                        == label_chunks[label_index]["en"] \
-                        and infer_chunks[infer_index]["type"] \
-                        == label_chunks[label_index]["type"]:
+                            == label_chunks[label_index]["en"] \
+                            and infer_chunks[infer_index]["type"] \
+                            == label_chunks[label_index]["type"]:
                         num_correct += 1
 
                     infer_index += 1
@@ -360,8 +368,10 @@ def calculate_f1(num_label, num_infer, num_correct):
         f1 = 2 * precision * recall / (precision + recall)
     return precision, recall, f1
 
+
 class LmPpl(Metrics):
     """ppl for language model"""
+
     def eval(self, run_value):
         label_len, loss = run_value
         total_ppl = 0.0

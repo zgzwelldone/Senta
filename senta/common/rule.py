@@ -60,13 +60,14 @@ class InstanceName(object):
 
     TRAINING = "training"  # 训练过程
     EVALUATE = "evaluate"  # 评估过程
-    TEST = "test" # 测试过程
+    TEST = "test"  # 测试过程
     SAVE_INFERENCE = "save_inference"  # 保存inference model的过程
-    
+
     STEP = "steps"
     SPEED = "speed"
     TIME_COST = "time_cost"
     GPU_ID = "gpu_id"
+
 
 class FieldLength(object):
     """一个field在序列化成field_id_list的时候，占的长度是多少
@@ -77,6 +78,7 @@ class FieldLength(object):
     ARRAY_SCALAR_FIELD = 2
     BASIC_TEXT_FIELD = 2
     GENERATE_LABEL_FIELD = 6
+
 
 class FleetMode(object):
     """Fleet模式

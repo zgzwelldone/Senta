@@ -7,6 +7,7 @@
 class TrainerConfig(object):
     """TrainerConfig
     """
+
     def __init__(self):
         self.do_train = True  # 训练模型时设置为True
         self.do_dev = False  # 训练过程中需要进行验证集评估的时候设置为True

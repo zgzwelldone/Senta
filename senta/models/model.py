@@ -10,7 +10,7 @@ class Model(object):
     """
 
     def __init__(self, model_params):
-        self.model_params = model_params 
+        self.model_params = model_params
 
     def forward(self, fields_dict, phase):
         """

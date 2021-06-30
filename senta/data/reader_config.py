@@ -6,6 +6,7 @@
 
 class ReaderConfig(object):
     """ReaderConfig"""
+
     def __init__(self):
         self.data_path = None
         self.shuffle = False

@@ -4,16 +4,16 @@ ErnieClassification
 """
 import collections
 import logging
-import os
 from collections import OrderedDict
 
 import numpy as np
 from paddle import fluid
+
+import senta.metrics.metrics as metrics
 from senta.common.register import RegisterSet
 from senta.common.rule import InstanceName
 from senta.models.model import Model
 from senta.modules.ernie import ErnieModel, ErnieConfig
-import senta.metrics.metrics as metrics
 
 
 @RegisterSet.models.register
@@ -42,7 +42,7 @@ class ErnieClassification(Model):
         instance_label = fields_dict["label"]
         record_id_label = instance_label[InstanceName.RECORD_ID]
         label = record_id_label[InstanceName.SRC_IDS]
-        
+
         qid = None
         if "qid" in fields_dict.keys():
             instance_qid = fields_dict["qid"]
@@ -58,7 +58,7 @@ class ErnieClassification(Model):
             x=emb_text_a,
             dropout_prob=0.1,
             dropout_implementation="upscale_in_train")
-        
+
         logits = fluid.layers.fc(
             input=cls_feats,
             size=num_labels,
@@ -86,7 +86,7 @@ class ErnieClassification(Model):
                 InstanceName.TARGET_PREDICTS: target_predict_list
             }
             return forward_return_dict
-        
+
         ce_loss, probs = fluid.layers.softmax_with_cross_entropy(
             logits=logits, label=label, return_softmax=True)
         loss = fluid.layers.mean(x=ce_loss)
@@ -180,12 +180,10 @@ class ErnieClassification(Model):
         :return:
         """
 
-        
-
         output = predict_result[0]
         output_data = output.data.float_data()
         batch_result = np.array(output_data).reshape((-1, 2))
-        #for item_prob in batch_result:
+        # for item_prob in batch_result:
         #    logging.info('\t'.join(map(str, item_prob.tolist())))
         return batch_result
 

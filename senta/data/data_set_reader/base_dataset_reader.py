@@ -14,6 +14,7 @@ class BaseDataSetReader(object):
     核心内容是读取明文文件，转换成id，按py_reader需要的tensor格式灌进去，然后通过调用run方法让整个循环跑起来。
     py_reader拿出的来的是lod-tensor形式的id，这些id可以用来做后面的embedding等计算。
     """
+
     def __init__(self, name, fields, config):
         self.name = name
         self.fields = fields
@@ -115,4 +116,3 @@ class BaseDataSetReader(object):
     def get_num_examples(self):
         """get number of example"""
         return self.num_examples
-

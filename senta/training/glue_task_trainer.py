@@ -3,6 +3,8 @@
 GlueTaskTrainer
 """
 import collections
+import logging
+import os
 import time
 import traceback
 from collections import OrderedDict
@@ -10,8 +12,6 @@ from collections import OrderedDict
 import numpy as np
 from paddle import fluid
 from paddle.fluid.incubate.fleet.collective import fleet
-import logging
-import os
 
 from senta.common.register import RegisterSet
 from senta.common.rule import InstanceName
@@ -21,6 +21,7 @@ from senta.training.base_trainer import BaseTrainer
 @RegisterSet.trainer.register
 class GlueTaskTrainer(BaseTrainer):
     """GlueTaskTrainer: Glue任务的trainer"""
+
     def __init__(self, params, data_set_reader, model_class):
         """
         :param params:
@@ -58,16 +59,16 @@ class GlueTaskTrainer(BaseTrainer):
         try:
             while True:
                 try:
-                    current_example, current_epoch = self.data_set_reader.train_reader.get_train_progress() 
+                    current_example, current_epoch = self.data_set_reader.train_reader.get_train_progress()
                     if (steps % self.params["train_log_step"] != 0 or self.trainer_id != 0 \
-                       and current_epoch == last_epoch):
+                            and current_epoch == last_epoch):
                         self.run(InstanceName.TRAINING, need_fetch=False)
                     else:
                         metrics_tensor_value = self.run(InstanceName.TRAINING, need_fetch=True)
                         logging.info("epoch {0} progress {1}/{2} pyreader queue size {3}".
                                      format(current_epoch, current_example, num_train_examples,
                                             self.data_set_reader.train_reader.paddle_py_reader.queue.size()))
-                        
+
                         current_example, current_epoch = self.data_set_reader.train_reader.get_train_progress()
 
                         fetch_output_dict = collections.OrderedDict()
@@ -84,23 +85,23 @@ class GlueTaskTrainer(BaseTrainer):
                                                                       InstanceName.TRAINING)
                         if self.params.get("visualdl_log", False):
                             assert isinstance(metrics_output, OrderedDict), "metrics_output is must be OrderedDict"
-                            self.visualdl_log(metrics_output, np.mean(fetch_output_dict[InstanceName.LOSS]), steps, 
+                            self.visualdl_log(metrics_output, np.mean(fetch_output_dict[InstanceName.LOSS]), steps,
                                               phase=InstanceName.TRAINING)
                         time_begin = time.time()
 
                     if steps % self.params["eval_step"] == 0 or last_epoch != current_epoch:
                         if self.params["is_eval_dev"]:
                             rets = self.evaluate_iterface(self.data_set_reader.dev_reader, \
-                                          InstanceName.EVALUATE, steps, current_epoch)
+                                                          InstanceName.EVALUATE, steps, current_epoch)
                             if self.trainer_id == 0:
                                 dev_score_history.append(rets[0]['score'])
                         else:
                             rets = None
-                            
+
                         if self.params["is_eval_test"]:
                             self.predict_iterface(self.data_set_reader.test_reader, \
-                                          InstanceName.TEST, steps, current_epoch, rets, \
-                                          dev_score_history)
+                                                  InstanceName.TEST, steps, current_epoch, rets, \
+                                                  dev_score_history)
                     if self.trainer_id == 0:
                         if steps % self.params["save_model_step"] == 0:
                             self.save_models(save_checkpoints_path, save_inference_model_path, steps)
@@ -119,7 +120,7 @@ class GlueTaskTrainer(BaseTrainer):
             if self.params["is_eval_dev"]:
                 logging.info("Final evaluate result: ")
                 rets = self.evaluate_iterface(self.data_set_reader.dev_reader, \
-                                     InstanceName.EVALUATE, steps, current_epoch)
+                                              InstanceName.EVALUATE, steps, current_epoch)
                 if self.trainer_id == 0:
                     dev_score_history.append(rets[0]['score'])
             else:
@@ -128,7 +129,7 @@ class GlueTaskTrainer(BaseTrainer):
             if self.params["is_eval_test"]:
                 logging.info("Final test result: ")
                 self.predict_iterface(self.data_set_reader.test_reader, InstanceName.TEST, \
-                              steps, current_epoch, rets, dev_score_history)
+                                      steps, current_epoch, rets, dev_score_history)
             if self.params.get("diagnostic", False):
                 logging.info("Final test on dianostic: ")
                 # TODO
@@ -141,14 +142,14 @@ class GlueTaskTrainer(BaseTrainer):
 
     def evaluate_iterface(self, reader, phase, step, current_epoch):
         """evaluate_iterface"""
-        #**************** multi dev files **************#
-        #rets = []
-        #for reader_ds in reader:
+        # **************** multi dev files **************#
+        # rets = []
+        # for reader_ds in reader:
         #    logging.info('evaluating {}'.format(reader_ds.name))
         #    meta = self.evaluate(reader_ds, InstanceName.EVALUATE, step, current_epoch)
         #    rets.append(ret)
-        
-        #*************** single dev file ***************#
+
+        # *************** single dev file ***************#
         rets = []
         meta = self.evaluate(reader, InstanceName.EVALUATE, step, current_epoch)
         rets.append(meta)
@@ -157,8 +158,8 @@ class GlueTaskTrainer(BaseTrainer):
 
     def predict_iterface(self, reader, phase, step, current_epoch, metas, dev_score_history):
         """predict iterface"""
-        #***************** multi test file ****************#
-        #for reader_f, save_f in zip(reader, save_dirs):
+        # ***************** multi test file ****************#
+        # for reader_f, save_f in zip(reader, save_dirs):
         #    save_path = save_f + '.' + str(current_epoch) + '.' + str(step)
         #    logging.info("testing {}, save to {}".format(reader_f.name, save_path))
         #    meta = self.evaluate(reader_f, InstanceName.TEST, step, current_eopch, metas)
@@ -173,8 +174,8 @@ class GlueTaskTrainer(BaseTrainer):
         #        with open(os.path.dirname(save_f) + 'best', 'w') as f:
         #            f.write("{}\n".format(dev_score_history[-1]))
         #            f.write('{}\n'.format(save_path))
-        
-        #***************** single test file ****************#
+
+        # ***************** single test file ****************#
         meta = self.evaluate(reader, InstanceName.TEST, step, current_epoch, metas)
         if self.trainer_id == 0:
             qids = meta["qids"]
@@ -182,7 +183,7 @@ class GlueTaskTrainer(BaseTrainer):
             probs = meta["probs"]
             test_save = self.params["test_save"]
             save_dirs = test_save.split(',')
-            
+
             if not os.path.exists(os.path.dirname(save_dirs[0])):
                 os.makedirs(os.path.dirname(save_dirs[0]))
 
@@ -193,7 +194,7 @@ class GlueTaskTrainer(BaseTrainer):
             save_path = save_dirs[0] + '.' + str(current_epoch) + '.' + str(step)
 
             with open(save_path, 'w') as f:
-                for id, s, p in  zip(qids, preds, probs):
+                for id, s, p in zip(qids, preds, probs):
                     f.write('{}\t{}\t{}\n'.format(id, s, p))
 
             if is_best:

@@ -6,15 +6,14 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import six
-import json
-import numpy as np
 import paddle.fluid as fluid
+
 from transformer_encoder import encoder, pre_process_layer
 
 
 class BertModel(object):
     """BertModel"""
+
     def __init__(self,
                  src_ids,
                  position_ids,

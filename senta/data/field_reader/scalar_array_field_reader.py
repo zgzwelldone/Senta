@@ -3,13 +3,12 @@
 :py:class:`ScalarArrayFieldReader`
 
 """
+from senta.common.register import RegisterSet
 from senta.common.rule import DataShape, FieldLength, InstanceName
 from senta.data.field_reader.base_field_reader import BaseFieldReader
 from senta.data.tokenizer.custom_tokenizer import CustomTokenizer
 from senta.data.util_helper import pad_batch_data
 from senta.utils.util_helper import truncation_words
-
-from senta.common.register import RegisterSet
 
 
 @RegisterSet.field_reader.register
@@ -17,6 +16,7 @@ class ScalarArrayFieldReader(BaseFieldReader):
     """标量数组的field_reader，直接返回数据本身(数据可以是明文字符串，明文通过json文件中配置的vocab_path去进行转换)和数据长度
      直接以空格分隔 备注：数据是加了padding的。
     """
+
     def __init__(self, field_config):
         """
         :param field_config:
@@ -64,9 +64,9 @@ class ScalarArrayFieldReader(BaseFieldReader):
         data_type = "int64" if self.field_config.data_type == DataShape.INT else "float32"
 
         padded_ids, batch_seq_lens = pad_batch_data(src_ids, insts_data_type=data_type,
-                                                              pad_idx=self.field_config.padding_id,
-                                                              return_input_mask=False,
-                                                              return_seq_lens=True)
+                                                    pad_idx=self.field_config.padding_id,
+                                                    return_input_mask=False,
+                                                    return_seq_lens=True)
         return_list = []
         return_list.append(padded_ids)
         return_list.append(batch_seq_lens)

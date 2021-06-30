@@ -11,6 +11,7 @@ from senta.modules.token_embedding.base_token_embedding import BaseTokenEmbeddin
 class CustomFluidTokenEmbedding(BaseTokenEmbedding):
     """CustomFluidTokenEmbedding: 使用paddle.fluid 的api实现的embedding，随机初始化，训练过程中不断finetune
     """
+
     def __init__(self, emb_dim, vocab_size):
         BaseTokenEmbedding.__init__(self, emb_dim, vocab_size)
         self.params_name = None

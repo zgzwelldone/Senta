@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*
 """maintain a dictionary of parameters"""
 
-import os
-import six
 import json
-import logging
+import os
+
+import six
 
 
 def _get_dict_from_environ_or_json_or_file(args, env_name):
@@ -24,7 +24,8 @@ def _get_dict_from_environ_or_json_or_file(args, env_name):
                              (repr(e), s))
         return r
     else:
-        return s  #None
+        return s  # None
+
 
 def parse_file(filename):
     """parse_file"""
@@ -33,19 +34,22 @@ def parse_file(filename):
         raise ValueError('file(%s) not found' % filename)
     return d
 
+
 def evaluate_file(filename):
     """evaluate_file"""
     # logging.info(
     #     f"error loading _jsonnet (this is expected on Windows), treating {filename} as plain json"
     # )
-    #logging.info(filename)
+    # logging.info(filename)
     with open(filename, "r") as evaluation_file:
         return evaluation_file.read()
+
 
 def from_file(filename):
     """from_file"""
     file_dict = json.loads(evaluate_file(filename), strict=False)
     return file_dict
+
 
 def replace_none(params):
     """replace_none"""
@@ -59,7 +63,7 @@ def replace_none(params):
                     value = chr(int(value, base=16))
                     print("ord(value): ", ord(value))
                 except Exception:
-                        pass
+                    pass
                 params[key] = value
         return params
     elif isinstance(params, list):

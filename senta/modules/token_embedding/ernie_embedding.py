@@ -11,6 +11,7 @@ from senta.modules.token_embedding.base_token_embedding import BaseTokenEmbeddin
 class ErnieTokenEmbedding(BaseTokenEmbedding):
     """ErnieTokenEmbedding: 使用ernie的embedding，训练过程中不断finetune
     """
+
     def __init__(self, emb_dim, vocab_size, params_path):
         BaseTokenEmbedding.__init__(self, emb_dim, vocab_size)
         self.params_path = params_path
@@ -44,7 +45,6 @@ class ErnieTokenEmbedding(BaseTokenEmbedding):
             InstanceName.POOLED_EMB: ernie.get_pooled_output()
         }
         return emb_dict
-
 
     def get_output_dim(self):
         """

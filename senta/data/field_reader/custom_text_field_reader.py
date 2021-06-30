@@ -16,6 +16,7 @@ from senta.utils.util_helper import truncation_words
 class CustomTextFieldReader(BaseFieldReader):
     """通用文本（string）类型的field_reader,文本处理规则是，文本类型的数据会自动添加padding和mask，并返回length
     """
+
     def __init__(self, field_config):
         """
         :param field_config:
@@ -35,7 +36,7 @@ class CustomTextFieldReader(BaseFieldReader):
 
         if self.field_config.embedding_info and self.field_config.embedding_info["use_reader_emb"]:
             self.token_embedding = CustomFluidTokenEmbedding(emb_dim=self.field_config.embedding_info["emb_dim"],
-                                                       vocab_size=self.tokenizer.vocabulary.get_vocab_size())
+                                                             vocab_size=self.tokenizer.vocabulary.get_vocab_size())
 
     def init_reader(self):
         """ 初始化reader格式
@@ -120,5 +121,3 @@ class CustomTextFieldReader(BaseFieldReader):
         :return:
         """
         return FieldLength.CUSTOM_TEXT_FIELD
-
-

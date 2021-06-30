@@ -2,15 +2,13 @@
 embedding layers
 """
 
+import datetime
+import logging
+import time
+
+import numpy as np
 import paddle.fluid as fluid
 import paddle.fluid.param_attr as attr
-import paddle.fluid.layers as layers
-import numpy as np
-import sys
-import os
-import logging
-import time, datetime
-import time
 
 
 class EmbeddingLayer(object):
@@ -32,10 +30,10 @@ class EmbeddingLayer(object):
         self.dict_path = dict_path
         self.name = name
         self.init_w2v = init_w2v
-        
+
         if self.init_w2v:
             self.weight_data = EmbeddingLayer.v2np(self)
-    
+
     def v2np(self):
         """
         vector to npy
@@ -52,7 +50,7 @@ class EmbeddingLayer(object):
         logging.info("please wait for a minute.")
         start = time.time()
         vecs = []
-        word2vec= {}
+        word2vec = {}
         with open(self.vec_path, "r") as f:
             f.readline()
             for line in f:
@@ -63,7 +61,7 @@ class EmbeddingLayer(object):
                 vector = info[1:]
                 if len(vector) != self.emb_dim:
                     logging.info(len(vector))
-                assert(len(vector) == self.emb_dim)
+                assert (len(vector) == self.emb_dim)
                 word2vec[word] = np.asarray(vector, dtype='float32')
 
         for word in id2word:
@@ -72,9 +70,9 @@ class EmbeddingLayer(object):
             else:
                 vecs.append(np.random.uniform(-0.05, 0.05, size=[self.emb_dim]).astype(np.float32))
         vecs = np.stack(vecs)
-        
+
         end = time.time()
-        logging.info("Spent %s on loading word2vec." % str(datetime.timedelta(seconds = end - start)))
+        logging.info("Spent %s on loading word2vec." % str(datetime.timedelta(seconds=end - start)))
 
         return vecs
 
@@ -83,9 +81,9 @@ class EmbeddingLayer(object):
         :param input:
         """
         if self.init_w2v:
-            #weight_data = EmbeddingLayer.v2np(self)
+            # weight_data = EmbeddingLayer.v2np(self)
             w_param_attrs = fluid.ParamAttr(
-                name=self.name, 
+                name=self.name,
                 learning_rate=1,
                 initializer=fluid.initializer.NumpyArrayInitializer(self.weight_data),
                 trainable=True)
@@ -95,7 +93,7 @@ class EmbeddingLayer(object):
                 is_sparse=False,
                 param_attr=w_param_attrs,
                 dtype='float32')
-        else:    
+        else:
             emb = fluid.layers.embedding(
                 input=input,
                 size=[self.dict_dim, self.emb_dim],

@@ -9,6 +9,7 @@ from senta.data.reader_config import ReaderConfig
 
 class DataSet(object):
     """DataSet"""
+
     def __init__(self, params_dict):
         """"""
         self.train_reader = None
@@ -46,7 +47,6 @@ class DataSet(object):
                     item_field.field_reader = field_reader
                     train_fields.append(item_field)
 
-
             reader_cfg = ReaderConfig()
             reader_cfg.build(self.params_dict.get(reader_name).get("config"))
 
@@ -68,21 +68,21 @@ class DataSet(object):
         if data_set_reader_dict.__contains__("predict_reader"):
             self.predict_reader = data_set_reader_dict["predict_reader"]
         elif self.train_reader:
-                cfg_list = self.params_dict.get("train_reader").get("fields")
-                predict_fields = []
-                for item in cfg_list:
-                    item_field = Field()
-                    item_field.build(item)
-                    if item_field.reader_info and item_field.reader_info.get("type", None):
-                        reader_class = RegisterSet.field_reader.__getitem__(item_field.reader_info["type"])
-                        field_reader = reader_class(item_field)
-                        item_field.field_reader = field_reader
-                        predict_fields.append(item_field)
+            cfg_list = self.params_dict.get("train_reader").get("fields")
+            predict_fields = []
+            for item in cfg_list:
+                item_field = Field()
+                item_field.build(item)
+                if item_field.reader_info and item_field.reader_info.get("type", None):
+                    reader_class = RegisterSet.field_reader.__getitem__(item_field.reader_info["type"])
+                    field_reader = reader_class(item_field)
+                    item_field.field_reader = field_reader
+                    predict_fields.append(item_field)
 
-                reader_cfg = ReaderConfig()
-                reader_cfg.build(self.params_dict.get("train_reader").get("config"))
+            reader_cfg = ReaderConfig()
+            reader_cfg.build(self.params_dict.get("train_reader").get("config"))
 
-                dataset_reader_name = self.params_dict.get("train_reader").get("type")
-                dataset_reader_class = RegisterSet.data_set_reader.__getitem__(dataset_reader_name)
-                self.predict_reader = dataset_reader_class(name="predict_reader", fields=predict_fields,
-                                                           config=reader_cfg)
+            dataset_reader_name = self.params_dict.get("train_reader").get("type")
+            dataset_reader_class = RegisterSet.data_set_reader.__getitem__(dataset_reader_name)
+            self.predict_reader = dataset_reader_class(name="predict_reader", fields=predict_fields,
+                                                       config=reader_cfg)

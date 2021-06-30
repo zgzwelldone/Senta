@@ -4,6 +4,7 @@
 
 """
 import paddle
+
 from senta.common.register import RegisterSet
 from senta.common.rule import DataShape, FieldLength, InstanceName
 from senta.data.field_reader.base_field_reader import BaseFieldReader
@@ -87,11 +88,11 @@ class ErnieSeqlabelLabelFieldReader(BaseFieldReader):
             # 加上截断策略
             if len(src_id) > self.field_config.max_seq_len - 2:
                 src_id = truncation_words(src_id, self.field_config.max_seq_len - 2, self.field_config.truncation_type)
-            unk_id = self.tokenizer.vocabulary.vocab_dict[self.field_config.tokenizer_info["unk_token"]] 
+            unk_id = self.tokenizer.vocabulary.vocab_dict[self.field_config.tokenizer_info["unk_token"]]
             src_id.insert(0, unk_id)
             src_id.append(unk_id)
             src_ids.append(src_id)
-        
+
         return_list = []
         padded_ids, mask_ids, batch_seq_lens = pad_batch_data(src_ids,
                                                               pad_idx=self.field_config.padding_id,

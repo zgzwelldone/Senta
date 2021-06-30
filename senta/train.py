@@ -3,27 +3,29 @@
 本文件定义了Senta类，实现其情感分类，训练模型的接口。
 """
 
-import os
-import io
-import shutil
-import time
-import requests
-import tarfile
 import logging
+import os
+import shutil
+import tarfile
+import time
+
 import numpy as np
+import requests
 from paddle.fluid.core import AnalysisConfig
 from paddle.fluid.core import create_paddle_predictor
-from senta.data.util_helper import convert_texts_to_ids, structure_fields_dict
-from senta.utils.params import from_file, replace_none
-from senta.utils.util_helper import array2tensor, check_cuda, text_type
-from senta.common.register import RegisterSet
+
 from senta.common import register
+from senta.common.register import RegisterSet
 from senta.common.rule import InstanceName
 from senta.data.data_set import DataSet
-from senta.utils import args, params, log
+from senta.data.util_helper import convert_texts_to_ids, structure_fields_dict
+from senta.utils import params
+from senta.utils.params import from_file, replace_none
+from senta.utils.util_helper import array2tensor, check_cuda, text_type
 
 logging.getLogger().setLevel(logging.INFO)
 _get_abs_path = lambda path: os.path.normpath(os.path.join(os.getcwd(), os.path.dirname(__file__), path))
+
 
 def get_http_url(url, file_name):
     """
@@ -36,17 +38,19 @@ def get_http_url(url, file_name):
         for chunk in r.iter_content(chunk_size=512):
             f.write(chunk)
 
+
 def untar(fname, dirs):
     """
     untar
     """
     try:
         t = tarfile.open(fname)
-        t.extractall(path = dirs)
+        t.extractall(path=dirs)
         return True
     except Exception as e:
         logging.error(e)
         return False
+
 
 def download_data(data_url, md5_url):
     """
@@ -75,6 +79,7 @@ def download_data(data_url, md5_url):
     get_http_url(data_url, model_files)
     untar(model_files, _get_abs_path("./"))
     return 1
+
 
 def dataset_reader_from_params(params_dict):
     """
@@ -127,6 +132,7 @@ def model_from_params(params_dict):
     model = model_class(params_dict)
     return model, num_train_examples
 
+
 def build_trainer(params_dict, dataset_reader, model, num_train_examples=0):
     """build trainer"""
     trainer_name = params_dict.get("type", "CustomTrainer")
@@ -138,6 +144,7 @@ def build_trainer(params_dict, dataset_reader, model, num_train_examples=0):
 
 class Senta(object):
     """docstring for Senta"""
+
     def __init__(self):
         super(Senta, self).__init__()
         self.__get_params()
@@ -223,9 +230,9 @@ class Senta(object):
 
         tokenizer_class = RegisterSet.tokenizer.__getitem__(tokenizer_name)
         self.tokenizer = tokenizer_class(vocab_file=tokenizer_vocab_path,
-                split_char=" ",
-                unk_token="[UNK]",
-                params=tokenizer_params)
+                                         split_char=" ",
+                                         unk_token="[UNK]",
+                                         params=tokenizer_params)
         self.max_seq_len = 512
         self.truncation_type = 0
         self.padding_id = 1 if tokenizer_name == "GptBpeTokenizer" else 0
@@ -244,7 +251,6 @@ class Senta(object):
                     idx, label = int(items[1]), items[0]
                     self.label_map[idx] = label
 
-    
     def predict(self, texts_, aspects=None):
         """
         the sentiment classifier's function
@@ -258,7 +264,7 @@ class Senta(object):
             aspects = [aspects]
 
         return_list = convert_texts_to_ids(texts_, self.tokenizer, self.max_seq_len, \
-                self.truncation_type, self.padding_id)
+                                           self.truncation_type, self.padding_id)
         record_dict = structure_fields_dict(return_list, 0, need_emb=False)
         input_list = []
         for item in self.input_keys:

@@ -1,8 +1,9 @@
 """Arguments for logging."""
 
-import os
 import logging
 import logging.handlers
+import os
+
 
 def init_log(log_path, level=logging.INFO, when="D", backup=7,
              format="%(levelname)s: %(asctime)s: %(filename)s:%(lineno)d * %(thread)d %(message)s",

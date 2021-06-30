@@ -1,12 +1,13 @@
 """multi process to test"""
-import os
-import json
-import time
-import six
-import math
-import subprocess
 import collections
+import json
 import logging
+import math
+import os
+import subprocess
+import time
+
+import six
 
 
 class MultiProcessEval(object):
@@ -31,7 +32,7 @@ class MultiProcessEval(object):
             writer.write(write_content)
             writer.close()
         if save_lists is not None and name_list is not None:
-            #save_list_name = ["qids", "labels", "scores"]
+            # save_list_name = ["qids", "labels", "scores"]
             save_list_name = name_list
             for idx in range(len(save_list_name)):
                 save_list = json.dumps(save_lists[idx])
@@ -49,7 +50,7 @@ class MultiProcessEval(object):
         eval_list_all = collections.defaultdict(list)
         while True:
             ret = subprocess.check_output(['find', self.output_path, '-maxdepth', '1', '-name',
-                                              self.eval_phase + '_dec_finish.*'])
+                                           self.eval_phase + '_dec_finish.*'])
             if six.PY3:
                 ret = ret.decode()
             ret = ret.rstrip().split("\n")
@@ -64,14 +65,14 @@ class MultiProcessEval(object):
                     eval_index_all = list(map(lambda x: x[0] + x[1], zip(eval_index_all, cur_eval_index_all)))
 
                 if num_list is not None and name_list is not None:
-                    #save_list_name = ["qids", "labels", "scores"]
+                    # save_list_name = ["qids", "labels", "scores"]
                     save_list_name = name_list
                     for idx in range(len(save_list_name)):
                         fin_list = open(outfile + "." + save_list_name[idx] + ".part." + str(dev_cnt), "r")
                         eval_list_all[save_list_name[idx]].extend(json.loads(fin_list.read()))
 
-            #subprocess.check_output(["rm ", outfile + ".*part*"])
-            #subprocess.check_output(["rm ", self.output_path + "/" + self.eval_phase + "_dec_finish.*"])
+            # subprocess.check_output(["rm ", outfile + ".*part*"])
+            # subprocess.check_output(["rm ", self.output_path + "/" + self.eval_phase + "_dec_finish.*"])
             os.system("rm " + outfile + ".*part*")
             os.system("rm " + self.output_path + "/" + self.eval_phase + "_dec_finish.*")
             break
@@ -82,6 +83,7 @@ class MultiProcessEval(object):
 
 class MultiProcessEvalForMrc(object):
     """multi process test for mrc tasks"""
+
     def __init__(self, output_path, eval_phase, dev_count, gpu_id, tokenizer):
         self.output_path = output_path
         self.eval_phase = eval_phase
@@ -108,14 +110,13 @@ class MultiProcessEvalForMrc(object):
         tmp_writer = open(self.output_path + "/" + self.eval_phase + "_dec_finish." + str(self.gpu_id), "w")
         tmp_writer.close()
 
-
     def concat_result(self, RawResult):
         """read result from hard disk and concat them"""
         outfile = self.output_path + "/" + self.eval_phase
         all_results_read = []
         while True:
             _, ret = subprocess.getstatusoutput('find ' + self.output_path + \
-                ' -maxdepth 1 -name ' + self.eval_phase + '_dec_finish.*')
+                                                ' -maxdepth 1 -name ' + self.eval_phase + '_dec_finish.*')
             ret = ret.split("\n")
             if len(ret) != self.dev_count:
                 time.sleep(1)
@@ -132,11 +133,11 @@ class MultiProcessEvalForMrc(object):
                             start_logits=tp[1],
                             end_logits=tp[2]))
 
-            #subprocess.getstatusoutput("rm " + outfile + ".part*")
-            #subprocess.getstatusoutput("rm " + self.output_path + "/" + self.eval_phase + "_dec_finish.*")
+            # subprocess.getstatusoutput("rm " + outfile + ".part*")
+            # subprocess.getstatusoutput("rm " + self.output_path + "/" + self.eval_phase + "_dec_finish.*")
             os.system("rm " + outfile + ".*part*")
             os.system("rm " + self.output_path + "/" + self.eval_phase + "_dec_finish.*")
-            
+
             break
 
         return all_results_read
@@ -284,7 +285,6 @@ class MultiProcessEvalForMrc(object):
         with open(output_nbest_file, "w") as writer:
             writer.write(json.dumps(all_nbest_json, indent=4) + "\n")
 
-
     def get_final_text(self, pred_text, orig_text, do_lower_case):
         """Project the tokenized prediction back to the original text."""
 
@@ -369,7 +369,6 @@ class MultiProcessEvalForMrc(object):
         output_text = orig_text[orig_start_position:(orig_end_position + 1)]
         return output_text
 
-
     def _get_best_indexes(self, logits, n_best_size):
         """Get the n-best logits from a list."""
         index_and_score = sorted(
@@ -381,7 +380,6 @@ class MultiProcessEvalForMrc(object):
                 break
             best_indexes.append(index_and_score[i][0])
         return best_indexes
-
 
     def _compute_softmax(self, scores):
         """Compute softmax probability over raw logits."""

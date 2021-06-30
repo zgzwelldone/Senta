@@ -6,10 +6,8 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import paddle.fluid.layers as layers
 import paddle.fluid as fluid
-import numpy as np
-import os
+import paddle.fluid.layers as layers
 
 cell_clip = 3.0
 proj_clip = 3.0

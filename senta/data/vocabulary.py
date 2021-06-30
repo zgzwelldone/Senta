@@ -3,11 +3,13 @@
 :py:class:`Vocabulary`
 """
 import collections
+
 from senta.utils.util_helper import convert_to_unicode
 
 
 class Vocabulary(object):
     """Vocabulary"""
+
     def __init__(self, vocab_path, unk_token):
         """
         :param vocab_path: 词表地址，必填
@@ -91,6 +93,3 @@ class Vocabulary(object):
         """
         UNK = self.vocab_dict[self.unk_token]
         return self.vocab_dict.get(token, UNK)
-
-
-

@@ -17,20 +17,19 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import os
-import sys
 import logging
-from collections import OrderedDict
+import os
 
-import paddle.fluid as fluid
 import numpy as np
-from senta.common.rule import InstanceName
+import paddle.fluid as fluid
+
 from senta.common.register import RegisterSet
-from senta.modules.ernie import ErnieModel, ErnieConfig
-from senta.models.ernie_classification import ErnieClassification
-from senta.utils.multi_process_eval import MultiProcessEval
+from senta.common.rule import InstanceName
 from senta.metrics.glue_eval import acc_and_f1, matthews_corrcoef, pearson_and_spearman, \
-                      simple_accuracy, evaluate_mrr, pgd_loss 
+    simple_accuracy
+from senta.models.ernie_classification import ErnieClassification
+from senta.modules.ernie import ErnieModel, ErnieConfig
+from senta.utils.multi_process_eval import MultiProcessEval
 
 
 @RegisterSet.models.register
@@ -39,7 +38,7 @@ class ErnieTwoSentClassificationEn(ErnieClassification):
 
     def __init__(self, model_params):
         ErnieClassification.__init__(self, model_params)
-        #logging.info("ErnieTwoSentClassificationEn init ....")
+        # logging.info("ErnieTwoSentClassificationEn init ....")
         self.is_classify = self.model_params["is_classify"]
         self.is_regression = self.model_params["is_regression"]
 
@@ -64,11 +63,11 @@ class ErnieTwoSentClassificationEn(ErnieClassification):
         instance_qid = fields_dict["qid"]
         record_id_qid = instance_qid[InstanceName.RECORD_ID]
         qid = record_id_qid[InstanceName.SRC_IDS]
-        
+
         # get output embedding of model
         emb_dict = self.make_embedding(fields_dict, phase)
         emb_text_a = emb_dict["text_a"]
-        
+
         cls_feats = fluid.layers.dropout(
             x=emb_text_a,
             dropout_prob=0.1,
@@ -99,9 +98,9 @@ class ErnieTwoSentClassificationEn(ErnieClassification):
                 InstanceName.TARGET_PREDICTS: target_predict_list
             }
             return forward_return_dict
-        
+
         assert self.is_classify != self.is_regression, \
-                "is_classify or is_regression must be true and only oen of them can be true"
+            "is_classify or is_regression must be true and only oen of them can be true"
         num_seqs = fluid.layers.create_tensor(dtype="int64")
 
         if self.is_classify:
@@ -114,7 +113,7 @@ class ErnieTwoSentClassificationEn(ErnieClassification):
             else:
                 ce_loss, probs = fluid.layers.softmax_with_cross_entropy(
                     logits=logits, label=label, return_softmax=True)
-                loss = fluid.layers.mean(x=ce_loss) 
+                loss = fluid.layers.mean(x=ce_loss)
             accuracy = fluid.layers.accuracy(input=probs, label=label, total=num_seqs)
         elif self.is_regression:
             if self.model_params["use_sigmoid"]:
@@ -123,8 +122,8 @@ class ErnieTwoSentClassificationEn(ErnieClassification):
             loss = fluid.layers.mean(x=cost)
         else:
             raise ValueError('unsupported fine tune mode. only supported classify/regression')
-        
-        #if args_finetune.adv:
+
+        # if args_finetune.adv:
         #    task_fc_fn = partial(task_fc,
         #                        args=args,
         #                        is_prediction=False,
@@ -184,7 +183,7 @@ class ErnieTwoSentClassificationEn(ErnieClassification):
         emb_sequence = ernie.get_pooled_output()
         embedding_dict = {"text_a": emb_sequence}
         return embedding_dict
-    
+
     def get_metrics(self, forward_output_dict, meta_info, phase, metas=None):
         """get metrics"""
         loss = forward_output_dict[InstanceName.LOSS]
@@ -197,7 +196,7 @@ class ErnieTwoSentClassificationEn(ErnieClassification):
             loss = forward_output_dict[InstanceName.LOSS]
             if self.is_classify:
                 acc = forward_output_dict["accuracy"]
- 
+
             if self.is_classify:
                 log_info = "step: %d, ave loss: %f, ave acc: %f, elapsed time: %f s"
                 values = (meta_info[InstanceName.STEP], loss, acc, \
@@ -218,18 +217,18 @@ class ErnieTwoSentClassificationEn(ErnieClassification):
                 num_seqs = forward_output_dict["num_seqs"]
                 acc = forward_output_dict["accuracy"]
                 assert len(loss) == len(acc) == len(predictions) == len(label) == \
-                        len(qid) == len(num_seqs), "the six results have different length"
+                       len(qid) == len(num_seqs), "the six results have different length"
             elif self.is_regression:
                 assert len(loss) == len(predictions) == len(label) == len(qid), \
-                        "the four results have differrnt length"
-            
+                    "the four results have differrnt length"
+
             output_path = "./output/tmpout"
-            mul_pro_test = MultiProcessEval(output_path, phase, trainers_num, 
-                                                        meta_info[InstanceName.GPU_ID])
+            mul_pro_test = MultiProcessEval(output_path, phase, trainers_num,
+                                            meta_info[InstanceName.GPU_ID])
             meta = {}
             if self.is_classify:
                 total_cost, total_acc, total_num_seqs, total_label_pos_num, total_pred_pos_num, \
-                        total_correct_num = 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
+                total_correct_num = 0.0, 0.0, 0.0, 0.0, 0.0, 0.0
                 qids, labels, scores, preds = [], [], [], []
                 for i in range(len(loss)):
                     total_cost += np.sum(loss[i] * num_seqs[i])
@@ -246,11 +245,11 @@ class ErnieTwoSentClassificationEn(ErnieClassification):
                     total_label_pos_num += np.sum(label[i])
                     total_pred_pos_num += np.sum(np_preds)
                     total_correct_num += np.sum(np.dot(np_preds, label[i]))
-                    
-                #output_path = "./tmpout"
-                #mul_pro_test = MultiProcessTestForClassifiy(output_path, phase, trainers_num, 
+
+                # output_path = "./tmpout"
+                # mul_pro_test = MultiProcessTestForClassifiy(output_path, phase, trainers_num,
                 #                                            meta_info[InstanceName.GPU_ID])
-    
+
                 if meta_info["metric"] == "acc_and_f1":
                     is_print = True
                     if mul_pro_test.dev_count == 1:
@@ -269,7 +268,7 @@ class ErnieTwoSentClassificationEn(ErnieClassification):
                             total_num_seqs = int(eval_index_all[0])
                     if is_print:
                         log_info = "[%d_%s evaluation] ave loss: %f, ave acc: %f, f1: %f, \
-                                    data_num: %d, elapsed time: %f s" 
+                                    data_num: %d, elapsed time: %f s"
                         values = (meta_info[InstanceName.STEP], phase, \
                                   total_cost / total_num_seqs, \
                                   ret["acc"], ret["f1"], total_num_seqs, \
@@ -277,7 +276,7 @@ class ErnieTwoSentClassificationEn(ErnieClassification):
                         evaluate_info = log_info % values
                         meta['score'] = ret['f1']
                         logging.info(evaluate_info)
-                
+
                 elif meta_info["metric"] == "matthews_corrcoef":
                     is_print = True
                     if mul_pro_test.dev_count == 1:
@@ -289,9 +288,9 @@ class ErnieTwoSentClassificationEn(ErnieClassification):
                         if mul_pro_test.gpu_id == 0:
                             is_print = True
                             eval_index_all, eval_list_all = mul_pro_test.concat_result(1, 2, \
-                                                                                      name_list)
+                                                                                       name_list)
                             preds_concat, labels_concat = [eval_list_all[name] for name in \
-                                                          name_list]
+                                                           name_list]
                             ret = matthews_corrcoef(preds_concat, labels_concat)
                             total_num_seqs = int(eval_index_all[0])
                     if is_print:
@@ -303,7 +302,7 @@ class ErnieTwoSentClassificationEn(ErnieClassification):
                         evaluate_info = log_info % values
                         meta['score'] = ret
                         logging.info(evaluate_info)
-                
+
                 elif meta_info["metric"] == "matthews_corrcoef_and_accf1":
                     is_print = True
                     if mul_pro_test.dev_count == 1:
@@ -316,9 +315,9 @@ class ErnieTwoSentClassificationEn(ErnieClassification):
                         if mul_pro_test.gpu_id == 0:
                             is_print = True
                             eval_index_all, eval_list_all = mul_pro_test.concat_result(1, 2, \
-                                                                                      name_list)
+                                                                                       name_list)
                             preds_concat, labels_concat = [eval_list_all[name] for name in \
-                                                          name_list]
+                                                           name_list]
                             mat_ret = matthews_corrcoef(preds_concat, labels_concat)
                             sim_net = acc_and_f1(preds_concat, labels_concat)
                             total_num_seqs = int(eval_index_all[0])
@@ -344,19 +343,19 @@ class ErnieTwoSentClassificationEn(ErnieClassification):
                         if mul_pro_test.gpu_id == 0:
                             is_print = True
                             eval_index_all, eval_list_all = mul_pro_test.concat_result(1, 2, \
-                                                                                      name_list)
+                                                                                       name_list)
                             scores_concat, labels_concat = [eval_list_all[name] for name in \
-                                                           name_list]
+                                                            name_list]
                             ret = pearson_and_spearman(scores_concat, labels_concat)
                             total_num_seqs = int(eval_index_all[0])
-                    
+
                     if is_print:
                         log_info = "[%d_%s evaluation] ave loss: %f, pearson: %f, spearman: %f, \
                                 corr: %f, data_num: %d, elapsed time: %f s"
                         values = (meta_info[InstanceName.STEP], phase, \
-                                 total_cost / total_num_seqs, ret['pearson'], ret['spearman'], \
-                                 ret['corr'], total_num_seqs, \
-                                 meta_info[InstanceName.TIME_COST])
+                                  total_cost / total_num_seqs, ret['pearson'], ret['spearman'], \
+                                  ret['corr'], total_num_seqs, \
+                                  meta_info[InstanceName.TIME_COST])
                         evaluate_info = log_info % values
                         meta['score'] = (ret['pearson'] + ret['spearmanr']) / 2.0
                         logging.info(evaluate_info)
@@ -372,9 +371,9 @@ class ErnieTwoSentClassificationEn(ErnieClassification):
                         if mul_pro_test.gpu_id == 0:
                             is_print = True
                             eval_index_all, eval_list_all = mul_pro_test.concat_result(1, 2, \
-                                                                                      name_list)
+                                                                                       name_list)
                             preds_concat, labels_concat = [eval_list_all[name] for name in \
-                                                          name_list]
+                                                           name_list]
                             ret = simple_accuracy(preds_concat, labels_concat)
                             total_num_seqs = int(eval_index_all[0])
                     if is_print:
@@ -386,7 +385,7 @@ class ErnieTwoSentClassificationEn(ErnieClassification):
                         evaluate_info = log_info % values
                         meta['score'] = ret
                         logging.info(evaluate_info)
-        
+
                 elif meta_info["metric"] == "acc_and_f1_and_mrr":
                     is_print = True
                     log_info = "[%d_%s evaluation] ave loss: %f, ave_acc: %f, f1: %f, \
@@ -395,13 +394,13 @@ class ErnieTwoSentClassificationEn(ErnieClassification):
                     if mul_pro_test.dev_count > 1:
                         is_print = False
                         mul_pro_test.write_result([total_num_seqs], [qids, labels, \
-                                                  scores, preds], name_list)
+                                                                     scores, preds], name_list)
                         if mul_pro_test.gpu_id == 0:
                             is_print = True
                             eval_index_all, eval_list_all = mul_pro_test.concat_result(1, 4, \
                                                                                        name_list)
                             qids, labels, scores, preds = [eval_list_all[name] for name in \
-                                                          name_list]
+                                                           name_list]
                             total_num_seqs = int(eval_index_all[0])
 
                     if is_print:
@@ -411,8 +410,8 @@ class ErnieTwoSentClassificationEn(ErnieClassification):
                             zip(qids, scores, labels), key=lambda elem: (elem[0], -elem[1]))
                         ret_b = mul_pro_test.evaluate_mrr(preds)
                         values = (meta_info[InstanceName.STEP], phase, \
-                                total_cost / total_num_seqs, ret_a['acc'], ret_a['f1'], \
-                                total_num_seqs, meta_info[InstanceName.TIME_COST])
+                                  total_cost / total_num_seqs, ret_a['acc'], ret_a['f1'], \
+                                  total_num_seqs, meta_info[InstanceName.TIME_COST])
                         evaluate_info = log_info % values
                         meta['score'] = ret_a['f1']
                         logging.info(evaluate_info)
@@ -430,7 +429,7 @@ class ErnieTwoSentClassificationEn(ErnieClassification):
                     else:
                         qids.extend(list(range(len(label[i]))))
                     scores.extend(predictions[i].reshape(-1).tolist())
-                
+
                 if meta_info["metric"] == "pearson_and_spearman":
                     is_print = True
                     if mul_pro_test.dev_count == 1:
@@ -442,9 +441,9 @@ class ErnieTwoSentClassificationEn(ErnieClassification):
                         if mul_pro_test.gpu_id == 0:
                             is_print = True
                             eval_index_all, eval_list_all = mul_pro_test.concat_result(0, 2, \
-                                                                                      name_list)
+                                                                                       name_list)
                             scores_concat, labels_concat = [eval_list_all[name] for name in \
-                                                           name_list]
+                                                            name_list]
                             ret = pearson_and_spearman(scores_concat, labels_concat)
                     if is_print:
                         log_info = "[%d_%s evaluation] ave loss: %f, pearson: %f, spearman: %f, \
@@ -469,7 +468,7 @@ class ErnieTwoSentClassificationEn(ErnieClassification):
                         if mul_pro_test.gpu_id == 0:
                             is_print = True
                             eval_index_all, eval_list_all = mul_pro_test.concat_result(0, 2, \
-                                                                                      name_list)
+                                                                                       name_list)
                             scores, labels = [eval_list_all[name] for name in \
                                               name_list]
 
@@ -485,7 +484,7 @@ class ErnieTwoSentClassificationEn(ErnieClassification):
                                 best_thresh = T
 
                         values = (meta_info[InstanceName.STEP], phase, 0.0, best_score, \
-                                total_num_seqs, best_thresh, meta_info[InstanceName.TIME_COST])
+                                  total_num_seqs, best_thresh, meta_info[InstanceName.TIME_COST])
                         evaluate_info = log_info % values
                         logging.info(evaluate_info)
 
@@ -499,10 +498,10 @@ class ErnieTwoSentClassificationEn(ErnieClassification):
             predictions = forward_output_dict[InstanceName.PREDICT_RESULT]
             qid = forward_output_dict["qid"]
             assert len(predictions) == len(qid), "the two fields must have same length"
-            
+
             output_path = "./output/tmpout"
-            mul_pro_test = MultiProcessEval(output_path, phase, trainers_num, 
-                                                        meta_info[InstanceName.GPU_ID])
+            mul_pro_test = MultiProcessEval(output_path, phase, trainers_num,
+                                            meta_info[InstanceName.GPU_ID])
 
             qids, scores, probs = [], [], []
             preds = []
@@ -529,7 +528,7 @@ class ErnieTwoSentClassificationEn(ErnieClassification):
                     is_print = True
                     eval_index_all, eval_list_all = mul_pro_test.concat_result(0, 3, name_list)
                     qids, preds, probs = [eval_list_all[name] for name in name_list]
-                
+
             if is_print:
                 meta = {
                     "qids": qids,
@@ -538,4 +537,3 @@ class ErnieTwoSentClassificationEn(ErnieClassification):
                 }
 
             return meta, None
-

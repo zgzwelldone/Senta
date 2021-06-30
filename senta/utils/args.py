@@ -17,10 +17,10 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import six
 import argparse
 import logging
-import os
+
+import six
 
 
 def str2bool(v):
@@ -31,8 +31,10 @@ def str2bool(v):
     # boolean directly
     return v.lower() in ("true", "t", "1")
 
+
 class ArgumentGroup(object):
     """ArgumentGroup"""
+
     def __init__(self, parser, title, des):
         self._group = parser.add_argument_group(title=title, description=des)
 

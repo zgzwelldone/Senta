@@ -16,6 +16,7 @@ class ScalarFieldReader(BaseFieldReader):
     """单个标量的field_reader，直接返回数据本身（数据可以是单个数字，也可以是单个的明文字符，
     明文通过json文件中配置的vocab_path去进行转换），shape= [batch_size,1]
     """
+
     def __init__(self, field_config):
         """
         :param field_config:

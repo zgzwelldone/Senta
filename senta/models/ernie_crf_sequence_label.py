@@ -9,11 +9,12 @@ from collections import OrderedDict
 
 import numpy as np
 from paddle import fluid
+
+import senta.metrics.metrics as metrics
 from senta.common.register import RegisterSet
 from senta.common.rule import InstanceName
 from senta.models.model import Model
 from senta.modules.ernie import ErnieModel, ErnieConfig
-import senta.metrics.metrics as metrics
 
 
 @RegisterSet.models.register
@@ -234,7 +235,7 @@ class ErnieCrfSeqLabel(Model):
         for end_index in seq_lens[1:]:
             example_true_length = end_index - start_index
             one_example_infer_result = output_data[start_index + 1: start_index + example_true_length - 1]
-            #logging.info(one_example_infer_result)
+            # logging.info(one_example_infer_result)
             start_index = end_index
             batch_result.append(one_example_infer_result)
         return batch_result
@@ -263,13 +264,13 @@ class ErnieCrfSeqLabel(Model):
         if phase == InstanceName.TRAINING:
             step = meta_info[InstanceName.STEP]
             time_cost = meta_info[InstanceName.TIME_COST]
-            #logging.debug("phase = {0} f1 = {1} precision = {2} recall = {3} step = {4} time_cost = {5}".format(
+            # logging.debug("phase = {0} f1 = {1} precision = {2} recall = {3} step = {4} time_cost = {5}".format(
             #    phase, f1_score, precision, recall, step, time_cost))
             logging.debug("phase = {0} step = {1} time_cost = {2}".format(
                 phase, step, time_cost))
         if phase == InstanceName.EVALUATE or phase == InstanceName.TEST:
             time_cost = meta_info[InstanceName.TIME_COST]
-            #logging.debug("phase = {0} f1 = {1} precision = {2} recall = {3} time_cost = {4}".format(
+            # logging.debug("phase = {0} f1 = {1} precision = {2} recall = {3} time_cost = {4}".format(
             #    phase, f1_score, precision, recall, time_cost))
             logging.debug("phase = {0} time_cost = {1}".format(
                 phase, time_cost))

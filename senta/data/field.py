@@ -7,6 +7,7 @@ from senta.common.rule import MaxTruncation, DataShape
 
 class Field(object):
     """Filed"""
+
     def __init__(self):
         self.name = None
         self.data_type = DataShape.STRING
@@ -44,9 +45,3 @@ class Field(object):
             self.embedding_info = params_dict["embedding"]
         if params_dict.__contains__("tokenizer"):
             self.tokenizer_info = params_dict["tokenizer"]
-
-
-
-
-
-

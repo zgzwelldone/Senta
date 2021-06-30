@@ -19,24 +19,24 @@ from __future__ import print_function
 
 from functools import partial
 
+import numpy as np
 import paddle.fluid as fluid
 import paddle.fluid.layers as layers
-import numpy as np
 
 
 def gelu(x):
-  """Gaussian Error Linear Unit.
+    """Gaussian Error Linear Unit.
 
-  This is a smoother version of the RELU.
-  Original paper: https://arxiv.org/abs/1606.08415
-  Args:
-    x: float Tensor to perform activation.
+    This is a smoother version of the RELU.
+    Original paper: https://arxiv.org/abs/1606.08415
+    Args:
+      x: float Tensor to perform activation.
 
-  Returns:
-    `x` with the GELU activation applied.
-  """
-  cdf = 0.5 * (1.0 + fluid.layers.tanh((np.sqrt(2.0 / np.pi) * (x + 0.044715 * fluid.layers.pow(x, 3.0)))))
-  return x * cdf
+    Returns:
+      `x` with the GELU activation applied.
+    """
+    cdf = 0.5 * (1.0 + fluid.layers.tanh((np.sqrt(2.0 / np.pi) * (x + 0.044715 * fluid.layers.pow(x, 3.0)))))
+    return x * cdf
 
 
 def multi_head_attention(queries,
@@ -60,8 +60,8 @@ def multi_head_attention(queries,
     values = keys if values is None else values
     if not (len(queries.shape) == len(keys.shape) == len(values.shape) == 3):
         raise ValueError(
-            "Inputs: quries, keys and values should all be 3-D tensors. but {} v.s. {} v.s. {}"\
-                    .format(queries.shape, keys.shape, values.shape))
+            "Inputs: quries, keys and values should all be 3-D tensors. but {} v.s. {} v.s. {}" \
+                .format(queries.shape, keys.shape, values.shape))
 
     def __compute_qkv(queries, keys, values, n_head, d_key, d_value):
         """
@@ -192,7 +192,7 @@ def positionwise_feed_forward(x,
     elif hidden_act == 'gelu.approximate':
         _hidden_act = None
     else:
-        _hidden_act =  hidden_act
+        _hidden_act = hidden_act
     hidden = layers.fc(input=x,
                        size=d_inner_hid,
                        num_flatten_dims=2,
@@ -209,7 +209,7 @@ def positionwise_feed_forward(x,
             hidden,
             dropout_prob=dropout_rate,
             dropout_implementation="upscale_in_train",
-            is_test=False) 
+            is_test=False)
     out = layers.fc(input=hidden,
                     size=d_hid,
                     num_flatten_dims=2,
@@ -219,11 +219,11 @@ def positionwise_feed_forward(x,
     return out
 
 
-def pre_post_process_layer(prev_out, 
-                           out, 
-                           process_cmd, 
-                           dropout_rate=0., 
-                           epsilon=1e-12, 
+def pre_post_process_layer(prev_out,
+                           out,
+                           process_cmd,
+                           dropout_rate=0.,
+                           epsilon=1e-12,
                            name=''):
     """
     Add residual connection, layer normalization and droput to the out tensor
@@ -325,26 +325,26 @@ def encoder_layer(enc_input,
         prepostprocess_dropout,
         name=name + '_post_ffn',
         epsilon=epsilon
-        ), ffd_output
+    ), ffd_output
 
 
 def encoder_inner_share(enc_input,
-                 attn_bias,
-                 n_head,
-                 d_key,
-                 d_value,
-                 d_model,
-                 d_inner_hid,
-                 prepostprocess_dropout,
-                 attention_dropout,
-                 relu_dropout,
-                 hidden_act,
-                 preprocess_cmd,
-                 postprocess_cmd,
-                 epsilon,
-                 param_initializer=None,
-                 name='',
-                 n_layer_per_block=1):
+                        attn_bias,
+                        n_head,
+                        d_key,
+                        d_value,
+                        d_model,
+                        d_inner_hid,
+                        prepostprocess_dropout,
+                        attention_dropout,
+                        relu_dropout,
+                        hidden_act,
+                        preprocess_cmd,
+                        postprocess_cmd,
+                        epsilon,
+                        param_initializer=None,
+                        name='',
+                        n_layer_per_block=1):
     """
        The encoder_inner_share is composed of n_layer_per_block layers returned by calling
        encoder_layer.
@@ -368,7 +368,7 @@ def encoder_inner_share(enc_input,
             param_initializer=param_initializer,
             name=name + '_layer_' + str(i),
             epsilon=epsilon,
-            )
+        )
         _checkpoints.append(cp)
         enc_input = enc_output
 
@@ -376,22 +376,22 @@ def encoder_inner_share(enc_input,
 
 
 def encoder_outer_share(enc_input,
-                 attn_bias,
-                 n_head,
-                 d_key,
-                 d_value,
-                 d_model,
-                 d_inner_hid,
-                 prepostprocess_dropout,
-                 attention_dropout,
-                 relu_dropout,
-                 hidden_act,
-                 preprocess_cmd,
-                 postprocess_cmd,
-                 epsilon,
-                 param_initializer=None,
-                 name='',
-                 n_layer_per_block=1):
+                        attn_bias,
+                        n_head,
+                        d_key,
+                        d_value,
+                        d_model,
+                        d_inner_hid,
+                        prepostprocess_dropout,
+                        attention_dropout,
+                        relu_dropout,
+                        hidden_act,
+                        preprocess_cmd,
+                        postprocess_cmd,
+                        epsilon,
+                        param_initializer=None,
+                        name='',
+                        n_layer_per_block=1):
     """
        The encoder_outer_share is composed of n_layer_per_block layers returned by calling
        encoder_layer.
@@ -455,14 +455,14 @@ def encoder(enc_input,
     #    [2]           [2]      ----/
 
     if param_share == "normal" or param_share == 'outer_share':
-        #n_layer_per_block=1,  n_layer=24 for bert-large
-        #n_layer_per_block=1,  n_layer=12 for bert-base
-        #n_layer_per_block=12, n_layer=12 for albert-xxlarge
-        #n_layer_per_block=6,  n_layer=12 for albert-xxlarge-outershare
+        # n_layer_per_block=1,  n_layer=24 for bert-large
+        # n_layer_per_block=1,  n_layer=12 for bert-base
+        # n_layer_per_block=12, n_layer=12 for albert-xxlarge
+        # n_layer_per_block=6,  n_layer=12 for albert-xxlarge-outershare
         enc_fn = encoder_outer_share
         name_fn = lambda i: name + '_layer_' + str(i)
     elif param_share == "inner_share":
-        #n_layer_per_block = 2
+        # n_layer_per_block = 2
         enc_fn = encoder_inner_share
         name_fn = lambda i: name
     else:
@@ -487,17 +487,14 @@ def encoder(enc_input,
             name=name_fn(i),
             n_layer_per_block=n_layer_per_block,
             epsilon=epsilon,
-            )
+        )
         checkpoints.extend(cp)
         enc_input = enc_output
     enc_output = pre_process_layer(
-        enc_output, 
-        preprocess_cmd, 
+        enc_output,
+        preprocess_cmd,
         prepostprocess_dropout,
         name="post_encoder",
         epsilon=epsilon)
 
     return enc_output, checkpoints
-
-
-

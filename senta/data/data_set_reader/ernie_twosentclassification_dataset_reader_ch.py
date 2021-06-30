@@ -1,15 +1,15 @@
 """task reader"""
 import csv
 import logging
-import numpy as np
 import traceback
-from paddle import fluid
 from collections import namedtuple
+
+import numpy as np
+from paddle import fluid
 
 from senta.common.register import RegisterSet
 from senta.common.rule import InstanceName
 from senta.data.data_set_reader.basic_dataset_reader_without_fields import TaskBaseReader
-
 from senta.data.util_helper import pad_batch_data
 
 
@@ -28,18 +28,18 @@ class TwoSentClassifyReaderCh(TaskBaseReader):
 
     def create_reader(self):
         """create reader"""
-        shapes=[[-1, self.max_seq_len, 1], [-1, self.max_seq_len, 1], [-1, self.max_seq_len, 1],
-                [-1, self.max_seq_len, 1], [-1, self.max_seq_len, 1], [-1, 1], [-1, 1]]
-        dtypes=['int64', 'int64', 'int64', 'int64', 'float32', 'int64', 'int64']
-        lod_levels=[0, 0, 0, 0, 0, 0, 0]
-        
+        shapes = [[-1, self.max_seq_len, 1], [-1, self.max_seq_len, 1], [-1, self.max_seq_len, 1],
+                  [-1, self.max_seq_len, 1], [-1, self.max_seq_len, 1], [-1, 1], [-1, 1]]
+        dtypes = ['int64', 'int64', 'int64', 'int64', 'float32', 'int64', 'int64']
+        lod_levels = [0, 0, 0, 0, 0, 0, 0]
+
         self.paddle_py_reader = fluid.layers.py_reader(
-        capacity=50,
-        shapes=shapes,
-        dtypes=dtypes,
-        lod_levels=lod_levels,
-        name=self.name,
-        use_double_buffer=True)
+            capacity=50,
+            shapes=shapes,
+            dtypes=dtypes,
+            lod_levels=lod_levels,
+            name=self.name,
+            use_double_buffer=True)
 
         logging.debug("{0} create py_reader shape = {1}, types = {2}, \
                       level = {3}: ".format(self.name, shapes, dtypes, lod_levels))
@@ -80,7 +80,6 @@ class TwoSentClassifyReaderCh(TaskBaseReader):
         fields_instance["qid"] = record_dict_qid
 
         return fields_instance
-
 
     def read_files(self, file_path, quotechar=None):
         """Reads a tab separated value file."""

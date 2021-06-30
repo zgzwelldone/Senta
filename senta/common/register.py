@@ -3,10 +3,9 @@
 :py:class:`Register` 将需要的模块加到注册表中，然后import
 """
 import importlib
-import traceback
-
 import logging
 import os
+import traceback
 
 
 class Register(object):
@@ -63,7 +62,7 @@ class RegisterSet(object):
     trainer = Register("trainer")
 
     package_names = ['senta.data.field_reader', 'senta.data.data_set_reader', 'senta.models',
-                    'senta.data.tokenizer', 'senta.training']
+                     'senta.data.tokenizer', 'senta.training']
     ALL_MODULES = []
     for package_name in package_names:
         module_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), "../../" + package_name.replace(".", '/'))
@@ -72,6 +71,7 @@ class RegisterSet(object):
             if os.path.isfile(os.path.join(module_dir, file)) and file.endswith(".py"):
                 module_files.append(file.replace(".py", ""))
         ALL_MODULES.append((package_name, module_files))
+
 
 def import_modules():
     """import需要的包，结合注册机制用

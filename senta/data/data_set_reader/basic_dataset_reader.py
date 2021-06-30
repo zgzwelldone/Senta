@@ -3,10 +3,11 @@
 :py:class:`BasicDataSetReader`
 """
 import csv
+import logging
 import os
 import traceback
-import logging
 from collections import namedtuple
+
 import numpy as np
 from paddle import fluid
 
@@ -123,8 +124,8 @@ class BasicDataSetReader(BaseDataSetReader):
                         example = self.Example(*line)
                         examples.append(example)
                     else:
-                        logging.warn('fileds in file %s not match: got %d, expect %d'\
-                                % (file_path, len(line), len_fields))
+                        logging.warn('fileds in file %s not match: got %d, expect %d' \
+                                     % (file_path, len(line), len_fields))
                 return examples
 
             except Exception:
@@ -180,4 +181,3 @@ class BasicDataSetReader(BaseDataSetReader):
             sum_examples += len(examples)
         self.num_examples = sum_examples
         return self.num_examples
-

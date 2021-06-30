@@ -8,6 +8,7 @@ from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_sc
 class SKLearnClassify(object):
     """SKLearnClassify
     """
+
     @staticmethod
     def evaluate(output, evaluate_types, average="macro"):
         """
@@ -179,6 +180,7 @@ class SKLearnClassify(object):
 class SimNetEvaluate(object):
     """SimNetEvaluate
     """
+
     @staticmethod
     def evaluate(output, evaluate_types):
         """
@@ -230,6 +232,7 @@ class SimNetEvaluate(object):
 class SequenceLabelEvaluate(object):
     """SequenceLabelEvaluate
     """
+
     @staticmethod
     def evaluate(output, evaluate_types):
         """

@@ -2,12 +2,13 @@
 """
 :py:`util_helper`
 """
-import paddle
 import numpy as np
+import paddle
 
-from senta.data.field import Field
 from senta.common.rule import InstanceName, FieldLength
+from senta.data.field import Field
 from senta.utils.util_helper import truncation_words
+
 
 def convert_text_to_id(text, field_config):
     """将一个明文样本转换成id
@@ -35,9 +36,9 @@ def convert_text_to_id(text, field_config):
 
 
 def padding_batch_data(insts,
-                   pad_idx=0,
-                   return_seq_lens=False,
-                   paddle_version_code=1.6):
+                       pad_idx=0,
+                       return_seq_lens=False,
+                       paddle_version_code=1.6):
     """
     :param insts:
     :param pad_idx:
@@ -150,14 +151,14 @@ def pad_batch_data(insts,
 
 
 def generate_pad_batch_data(insts,
-                   insts_data_type="int64",
-                   pad_idx=0,
-                   return_pos=False,
-                   return_input_mask=False,
-                   return_max_len=False,
-                   return_num_token=False,
-                   return_seq_lens=False,
-                   paddle_version_code=1.6):
+                            insts_data_type="int64",
+                            pad_idx=0,
+                            return_pos=False,
+                            return_input_mask=False,
+                            return_max_len=False,
+                            return_num_token=False,
+                            return_seq_lens=False,
+                            paddle_version_code=1.6):
     """
     Pad the instances to the max sequence length in batch, and generate the
     corresponding position data and attention bias.
@@ -276,6 +277,7 @@ def structure_fields_dict(fields_id, start_index, need_emb=True):
     record_dict[InstanceName.RECORD_EMB] = record_emb_dict
 
     return record_dict
+
 
 def get_field_length():
     """获取当前这个field在进行了序列化之后，在field_id_list中占多少长度

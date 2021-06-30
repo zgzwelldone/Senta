@@ -3,6 +3,8 @@
 CustomTrainer
 """
 import collections
+import logging
+import os
 import time
 import traceback
 from collections import OrderedDict
@@ -10,18 +12,19 @@ from collections import OrderedDict
 import numpy as np
 from paddle import fluid
 from paddle.fluid.incubate.fleet.parameter_server.distribute_transpiler import fleet
-import logging
-import os
 
 from senta.common.register import RegisterSet
 from senta.common.rule import InstanceName
 from senta.training.base_trainer import BaseTrainer
+
+
 # from senta.training.trainer_pro import BaseTrainer
 
 
 @RegisterSet.trainer.register
 class CustomTrainer(BaseTrainer):
     """CustomTrainer:通用senta任务的trainer"""
+
     def __init__(self, params, data_set_reader, model_class):
         """
         :param params:
@@ -79,7 +82,7 @@ class CustomTrainer(BaseTrainer):
                                                                       InstanceName.TRAINING)
                         if self.params.get("visualdl_log", False):
                             assert isinstance(metrics_output, OrderedDict), "metrics_output is must be OrderedDict"
-                            self.visualdl_log(metrics_output, np.mean(fetch_output_dict[InstanceName.LOSS]), steps, 
+                            self.visualdl_log(metrics_output, np.mean(fetch_output_dict[InstanceName.LOSS]), steps,
                                               phase=InstanceName.TRAINING)
                         time_begin = time.time()
 

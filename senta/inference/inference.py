@@ -3,24 +3,25 @@
 inference
 """
 
-
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
 import logging
-import time
 import os
+import time
+
+from paddle.fluid.core_avx import AnalysisConfig, create_paddle_predictor
 
 from senta.common.rule import InstanceName
 from senta.utils import params
 from senta.utils.util_helper import array2tensor
-from paddle.fluid.core_avx import AnalysisConfig, create_paddle_predictor
 
 
 class Inference(object):
     """Inferece:模型预测
     """
+
     def __init__(self, param, data_set_reader, model_class):
         """
         1.解析input_data的结构 2.解析参数，构造inference  3. 启动data_generator,开始预测 4.回掉预测结果到model中进行解析
@@ -54,9 +55,9 @@ class Inference(object):
         """
         :return:
         """
-        self.inference = self.load_inference_model(self.param["inference_model_path"], 
-                self.param["PADDLE_USE_GPU"])
-    
+        self.inference = self.load_inference_model(self.param["inference_model_path"],
+                                                   self.param["PADDLE_USE_GPU"])
+
     def init_data_params(self):
         """
         :return:
@@ -73,7 +74,7 @@ class Inference(object):
         """
         logging.info("start do inference....")
         test_save = self.param.get("test_save")
-        #"./output/inference/test_out.tsv")
+        # "./output/inference/test_out.tsv")
         if not os.path.exists(os.path.dirname(test_save)):
             os.makedirs(os.path.dirname(test_save))
 

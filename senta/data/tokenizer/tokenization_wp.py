@@ -15,6 +15,7 @@
 
 """Tokenization classes."""
 import unicodedata
+
 import six
 from six.moves import range
 
@@ -36,6 +37,7 @@ from .tokenization_utils import BpeEncoder, convert_by_vocab
 class GptBpeTokenizer(Tokenizer):
     """Gpt bpe tokenizer
     """
+
     def __init__(self, vocab_file, split_char=" ", unk_token="[UNK]", params=None):
         Tokenizer.__init__(self, vocab_file, split_char, unk_token, params=params)
 
@@ -69,6 +71,7 @@ class GptBpeTokenizer(Tokenizer):
 class FullTokenizer(Tokenizer):
     """FullTokenizer:basic, sentence_piece, word_piece的总集，按字粒度进行切分
     """
+
     def __init__(self, vocab_file, split_char=" ", unk_token="[UNK]", params=None):
         Tokenizer.__init__(self, vocab_file, split_char, params=params)
         self.basic_tokenizer = BasicTokenizer(vocab_file=vocab_file, unk_token=unk_token, params=params)
@@ -207,13 +210,13 @@ class BasicTokenizer(Tokenizer):
         # space-separated words, so they are not treated specially and handled
         # like the all of the other languages.
         if ((cp >= 0x4E00 and cp <= 0x9FFF) or  #
-            (cp >= 0x3400 and cp <= 0x4DBF) or  #
-            (cp >= 0x20000 and cp <= 0x2A6DF) or  #
-            (cp >= 0x2A700 and cp <= 0x2B73F) or  #
-            (cp >= 0x2B740 and cp <= 0x2B81F) or  #
-            (cp >= 0x2B820 and cp <= 0x2CEAF) or
-            (cp >= 0xF900 and cp <= 0xFAFF) or  #
-            (cp >= 0x2F800 and cp <= 0x2FA1F)):  #
+                (cp >= 0x3400 and cp <= 0x4DBF) or  #
+                (cp >= 0x20000 and cp <= 0x2A6DF) or  #
+                (cp >= 0x2A700 and cp <= 0x2B73F) or  #
+                (cp >= 0x2B740 and cp <= 0x2B81F) or  #
+                (cp >= 0x2B820 and cp <= 0x2CEAF) or
+                (cp >= 0xF900 and cp <= 0xFAFF) or  #
+                (cp >= 0x2F800 and cp <= 0x2FA1F)):  #
             return True
 
         return False
@@ -313,6 +316,7 @@ class WordPieceTokenizer(Tokenizer):
 @RegisterSet.tokenizer.register
 class SentencePieceTokenizer(WordPieceTokenizer):
     """tokenize"""
+
     def tokenize(self, text):
         """
         :param text:
@@ -390,6 +394,7 @@ class CharTokenizer(Tokenizer):
 @RegisterSet.tokenizer.register
 class WordsegTokenizer(Tokenizer):
     """Runs Wordseg tokenziation."""
+
     def __init__(self, vocab_file, split_char="\1", unk_token="[UNK]", params=None):
         Tokenizer.__init__(self, vocab_file, split_char, unk_token, params)
         model_file = params.get("sentence_piece_model", None)
@@ -429,6 +434,7 @@ class WordsegTokenizer(Tokenizer):
 @RegisterSet.tokenizer.register
 class SentencepieceTokenizerErnie(Tokenizer):
     """Runs SentencePiece tokenziation."""
+
     def __init__(self, vocab_file, split_char=" ", unk_token="[UNK]", params=None):
         Tokenizer.__init__(self, vocab_file, split_char, unk_token, params)
         model_file = params.get("sentence_piece_model", None)
@@ -472,6 +478,7 @@ class SentencepieceTokenizerErnie(Tokenizer):
 class WSSPTokenizer(Tokenizer):
     """WSSP:basic, sentence_piece, word_piece的总集，按字粒度进行切分
     """
+
     def __init__(self, vocab_file, split_char, unk_token, params=None):
         super(WSSPTokenizer, self).__init__(vocab_file, split_char, unk_token, params=None)
         self.sp_model = sp.SentencePieceProcessor()
@@ -494,12 +501,12 @@ class WSSPTokenizer(Tokenizer):
                     words.append(cand)
                     matched = True
                     break
-            if not matched: 
+            if not matched:
                 i = 1
                 words.append(chars[idx])
             idx += i
         return words
- 
+
     def tokenize(self, sen):
         """
         :param text:
@@ -524,4 +531,3 @@ class WSSPTokenizer(Tokenizer):
         :return:
         """
         return self.vocabulary.convert_ids_to_tokens(ids)
-
